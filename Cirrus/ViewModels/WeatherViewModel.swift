@@ -6,12 +6,14 @@ import OSLog
 final class WeatherViewModel: ObservableObject {
     @Published private(set) var snapshot: WeatherSnapshot?
     @Published private(set) var airQuality: AirQuality?
+    @Published private(set) var pollen: Pollen?
     @Published private(set) var isLoading = false
     @Published private(set) var error: String?
 
     private var weatherProvider: any WeatherProviding
     private let locationProvider: any LocationProviding
     private let airQualityProvider: any AirQualityProviding
+    private let pollenProvider: any PollenProviding
     private let cache: WeatherCacheService
     private var refreshTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
@@ -24,11 +26,13 @@ final class WeatherViewModel: ObservableObject {
         weatherProvider: any WeatherProviding,
         locationProvider: any LocationProviding,
         airQualityProvider: any AirQualityProviding = OpenMeteoAirQualityService(),
+        pollenProvider: any PollenProviding = OpenMeteoPollenService(),
         cache: WeatherCacheService = WeatherCacheService()
     ) {
         self.weatherProvider = weatherProvider
         self.locationProvider = locationProvider
         self.airQualityProvider = airQualityProvider
+        self.pollenProvider = pollenProvider
         self.cache = cache
 
         locationProvider.currentLocationPublisher
@@ -58,11 +62,13 @@ final class WeatherViewModel: ObservableObject {
         do {
             async let weatherFetch = weatherProvider.fetchWeather(for: location)
             async let aqFetch = airQualityProvider.fetchAirQuality(for: location)
+            async let pollenFetch = pollenProvider.fetchPollen(for: location)
 
             let result = try await weatherFetch
             snapshot = result
             await cache.store(result)
             airQuality = try? await aqFetch
+            pollen = try? await pollenFetch
             Log.weather.debug("Fetched weather for \(location.name)")
         } catch {
             self.error = error.localizedDescription

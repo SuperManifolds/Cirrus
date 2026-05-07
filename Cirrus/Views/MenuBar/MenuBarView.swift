@@ -20,6 +20,7 @@ struct MenuBarView: View {
                     locationName: snapshot.location.name,
                     isPinnedLocation: !settingsViewModel.useCurrentLocation,
                     airQuality: settingsViewModel.showAirQuality ? weatherViewModel.airQuality : nil,
+                    pollen: settingsViewModel.showAirQuality ? weatherViewModel.pollen : nil,
                     unit: settingsViewModel.temperatureUnit,
                     locationSearchViewModel: locationSearchViewModel,
                     onLocationSelected: { location in

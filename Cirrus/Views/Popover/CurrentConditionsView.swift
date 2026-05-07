@@ -6,6 +6,7 @@ struct CurrentConditionsView: View {
     let locationName: String
     let isPinnedLocation: Bool
     let airQuality: AirQuality?
+    let pollen: Pollen?
     let unit: TemperatureUnit
     @ObservedObject var locationSearchViewModel: LocationSearchViewModel
     var onLocationSelected: (Location) -> Void
@@ -59,6 +60,12 @@ struct CurrentConditionsView: View {
                 AQICard(airQuality: airQuality),
                 PM25Card(airQuality: airQuality),
                 PM10Card(airQuality: airQuality),
+                PollenCard(name: String(localized: "Birch Pollen"), grains: pollen?.birch),
+                PollenCard(name: String(localized: "Grass Pollen"), grains: pollen?.grass),
+                PollenCard(name: String(localized: "Alder Pollen"), grains: pollen?.alder),
+                PollenCard(name: String(localized: "Mugwort Pollen"), grains: pollen?.mugwort),
+                PollenCard(name: String(localized: "Olive Pollen"), grains: pollen?.olive),
+                PollenCard(name: String(localized: "Ragweed Pollen"), grains: pollen?.ragweed),
                 SunriseCard(today: today),
                 SunsetCard(today: today)
             ])
@@ -112,6 +119,10 @@ struct CurrentConditionsView: View {
             aqi: 35, aqiCategory: .fair, pm25: 8.5, pm10: 15.2,
             ozone: 62, nitrogenDioxide: 12, sulphurDioxide: 3,
             carbonMonoxide: 210, timestamp: Date()
+        ),
+        pollen: Pollen(
+            alder: 5, birch: 45, grass: 80,
+            mugwort: 0, olive: 0, ragweed: 0, timestamp: Date()
         ),
         unit: .celsius,
         locationSearchViewModel: LocationSearchViewModel.preview(),
