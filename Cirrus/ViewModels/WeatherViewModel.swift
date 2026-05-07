@@ -5,11 +5,13 @@ import OSLog
 @MainActor
 final class WeatherViewModel: ObservableObject {
     @Published private(set) var snapshot: WeatherSnapshot?
+    @Published private(set) var airQuality: AirQuality?
     @Published private(set) var isLoading = false
     @Published private(set) var error: String?
 
     private var weatherProvider: any WeatherProviding
     private let locationProvider: any LocationProviding
+    private let airQualityProvider: any AirQualityProviding
     private let cache: WeatherCacheService
     private var refreshTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
@@ -21,10 +23,12 @@ final class WeatherViewModel: ObservableObject {
     init(
         weatherProvider: any WeatherProviding,
         locationProvider: any LocationProviding,
+        airQualityProvider: any AirQualityProviding = OpenMeteoAirQualityService(),
         cache: WeatherCacheService = WeatherCacheService()
     ) {
         self.weatherProvider = weatherProvider
         self.locationProvider = locationProvider
+        self.airQualityProvider = airQualityProvider
         self.cache = cache
 
         locationProvider.currentLocationPublisher
@@ -52,9 +56,13 @@ final class WeatherViewModel: ObservableObject {
         error = nil
 
         do {
-            let result = try await weatherProvider.fetchWeather(for: location)
+            async let weatherFetch = weatherProvider.fetchWeather(for: location)
+            async let aqFetch = airQualityProvider.fetchAirQuality(for: location)
+
+            let result = try await weatherFetch
             snapshot = result
             await cache.store(result)
+            airQuality = try? await aqFetch
             Log.weather.debug("Fetched weather for \(location.name)")
         } catch {
             self.error = error.localizedDescription

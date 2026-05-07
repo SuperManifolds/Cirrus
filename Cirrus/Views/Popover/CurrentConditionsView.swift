@@ -5,6 +5,7 @@ struct CurrentConditionsView: View {
     let today: DailyForecast?
     let locationName: String
     let isPinnedLocation: Bool
+    let airQuality: AirQuality?
     let unit: TemperatureUnit
     @ObservedObject var locationSearchViewModel: LocationSearchViewModel
     var onLocationSelected: (Location) -> Void
@@ -55,6 +56,9 @@ struct CurrentConditionsView: View {
                 VisibilityCard(current: current),
                 DewPointCard(current: current, unit: unit),
                 SnowDepthCard(current: current),
+                AQICard(airQuality: airQuality),
+                PM25Card(airQuality: airQuality),
+                PM10Card(airQuality: airQuality),
                 SunriseCard(today: today),
                 SunsetCard(today: today)
             ])
@@ -104,6 +108,11 @@ struct CurrentConditionsView: View {
         ),
         locationName: "Oslo",
         isPinnedLocation: false,
+        airQuality: AirQuality(
+            aqi: 35, aqiCategory: .fair, pm25: 8.5, pm10: 15.2,
+            ozone: 62, nitrogenDioxide: 12, sulphurDioxide: 3,
+            carbonMonoxide: 210, timestamp: Date()
+        ),
         unit: .celsius,
         locationSearchViewModel: LocationSearchViewModel.preview(),
         onLocationSelected: { _ in },

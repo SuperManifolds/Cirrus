@@ -125,3 +125,58 @@ struct SunsetCard: WeatherCard {
         return sunset.formatted(date: .omitted, time: .shortened)
     }
 }
+
+// MARK: - Air Quality Cards
+
+struct AQICard: WeatherCard {
+    let airQuality: AirQuality?
+    var title: String { String(localized: "Air Quality") }
+    var icon: String { "aqi.medium" }
+    var iconColor: Color { aqiColor }
+    var isRelevant: Bool { airQuality != nil }
+    var value: String {
+        guard let aq = airQuality else { return "" }
+        return "\(aq.aqi) · \(aq.aqiCategory.displayName)"
+    }
+    private var aqiColor: Color {
+        guard let aq = airQuality else { return .gray }
+        switch aq.aqiCategory {
+            case .good: return .green
+            case .fair: return .yellow
+            case .moderate: return .orange
+            case .poor: return .red
+            case .veryPoor: return .purple
+            case .hazardous: return .red
+        }
+    }
+}
+
+struct PM25Card: WeatherCard {
+    let airQuality: AirQuality?
+    var title: String { String(localized: "PM2.5") }
+    var icon: String { "circle.dotted.circle" }
+    var iconColor: Color { .indigo }
+    var isRelevant: Bool {
+        guard let aq = airQuality else { return false }
+        return aq.pm25 >= 10
+    }
+    var value: String {
+        guard let aq = airQuality else { return "" }
+        return "\(Int(aq.pm25)) µg/m³"
+    }
+}
+
+struct PM10Card: WeatherCard {
+    let airQuality: AirQuality?
+    var title: String { String(localized: "PM10") }
+    var icon: String { "circle.dotted.circle" }
+    var iconColor: Color { .brown }
+    var isRelevant: Bool {
+        guard let aq = airQuality else { return false }
+        return aq.pm10 >= 20
+    }
+    var value: String {
+        guard let aq = airQuality else { return "" }
+        return "\(Int(aq.pm10)) µg/m³"
+    }
+}

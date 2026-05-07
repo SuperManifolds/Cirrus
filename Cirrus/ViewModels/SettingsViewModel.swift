@@ -40,6 +40,10 @@ final class SettingsViewModel: ObservableObject {
         didSet { UserDefaults.standard.set(coloredMenuBarIcon, forKey: Keys.coloredMenuBarIcon) }
     }
 
+    @Published var showAirQuality: Bool {
+        didSet { UserDefaults.standard.set(showAirQuality, forKey: Keys.showAirQuality) }
+    }
+
     @Published var launchAtLogin: Bool {
         didSet { updateLaunchAtLogin() }
     }
@@ -75,6 +79,10 @@ final class SettingsViewModel: ObservableObject {
 
         coloredMenuBarIcon = defaults.bool(forKey: Keys.coloredMenuBarIcon)
 
+        showAirQuality = defaults.object(forKey: Keys.showAirQuality) == nil
+            ? true
+            : defaults.bool(forKey: Keys.showAirQuality)
+
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 
@@ -98,6 +106,7 @@ final class SettingsViewModel: ObservableObject {
         static let useCurrentLocation = "useCurrentLocation"
         static let pinnedLocation = "pinnedLocation"
         static let coloredMenuBarIcon = "coloredMenuBarIcon"
+        static let showAirQuality = "showAirQuality"
     }
 
     #if DEBUG

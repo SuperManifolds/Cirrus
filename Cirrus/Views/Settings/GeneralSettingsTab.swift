@@ -25,6 +25,8 @@ struct GeneralSettingsTab: View {
 
             Toggle(String(localized: "Colored Menu Bar Icon"), isOn: $settingsViewModel.coloredMenuBarIcon)
 
+            Toggle(String(localized: "Show Air Quality"), isOn: $settingsViewModel.showAirQuality)
+
             Toggle(String(localized: "Launch at Login"), isOn: $settingsViewModel.launchAtLogin)
         }
         .formStyle(.grouped)
