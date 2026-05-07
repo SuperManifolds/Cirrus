@@ -7,6 +7,7 @@ struct CurrentConditionsView: View {
     let isPinnedLocation: Bool
     let airQuality: AirQuality?
     let pollen: Pollen?
+    let summary: String?
     let unit: TemperatureUnit
     @ObservedObject var locationSearchViewModel: LocationSearchViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
@@ -49,6 +50,15 @@ struct CurrentConditionsView: View {
                 }
             }
             .padding(.bottom, 2)
+
+            if let summary {
+                Text(summary)
+                    .font(.callout)
+                    .italic()
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             DetailCardsGrid(cards: [
                 WindCard(current: current),
@@ -126,6 +136,7 @@ struct CurrentConditionsView: View {
             alder: 5, birch: 45, grass: 80,
             mugwort: 0, olive: 0, ragweed: 0, timestamp: Date()
         ),
+        summary: "Partly cloudy this morning, clearing by afternoon with highs around 24°C.",
         unit: .celsius,
         locationSearchViewModel: LocationSearchViewModel.preview(),
         settingsViewModel: SettingsViewModel.preview(),

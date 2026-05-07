@@ -7,13 +7,17 @@ final class WeatherViewModel: ObservableObject {
     @Published private(set) var snapshot: WeatherSnapshot?
     @Published private(set) var airQuality: AirQuality?
     @Published private(set) var pollen: Pollen?
+    @Published private(set) var summary: String?
     @Published private(set) var isLoading = false
+    var enableAISummary = true
+    var temperatureUnit: TemperatureUnit = .celsius
     @Published private(set) var error: String?
 
     private var weatherProvider: any WeatherProviding
     private let locationProvider: any LocationProviding
     private let airQualityProvider: any AirQualityProviding
     private let pollenProvider: any PollenProviding
+    private let summaryService = WeatherSummaryService()
     private let cache: WeatherCacheService
     private var refreshTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
@@ -79,6 +83,18 @@ final class WeatherViewModel: ObservableObject {
             airQuality = try? await aqFetch
             pollen = try? await pollenFetch
             Log.weather.debug("Fetched weather for \(location.name)")
+
+            Log.weather.debug("AI summary enabled: \(self.enableAISummary)")
+            if enableAISummary {
+                summary = await summaryService.generateSummary(
+                    from: result,
+                    airQuality: airQuality,
+                    pollen: pollen,
+                    unit: temperatureUnit
+                )
+            } else {
+                summary = nil
+            }
         } catch {
             self.error = error.localizedDescription
             Log.weather.error("Weather fetch failed: \(error.localizedDescription)")

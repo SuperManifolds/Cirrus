@@ -52,6 +52,10 @@ final class SettingsViewModel: ObservableObject {
         didSet { UserDefaults.standard.set(showAirQuality, forKey: Keys.showAirQuality) }
     }
 
+    @Published var showAISummary: Bool {
+        didSet { UserDefaults.standard.set(showAISummary, forKey: Keys.showAISummary) }
+    }
+
     @Published var launchAtLogin: Bool {
         didSet { updateLaunchAtLogin() }
     }
@@ -96,6 +100,10 @@ final class SettingsViewModel: ObservableObject {
         showAirQuality = defaults.object(forKey: Keys.showAirQuality) == nil
             ? true
             : defaults.bool(forKey: Keys.showAirQuality)
+
+        showAISummary = defaults.object(forKey: Keys.showAISummary) == nil
+            ? true
+            : defaults.bool(forKey: Keys.showAISummary)
 
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
@@ -142,6 +150,7 @@ final class SettingsViewModel: ObservableObject {
         static let coloredMenuBarIcon = "coloredMenuBarIcon"
         static let showAirQuality = "showAirQuality"
         static let favoriteLocations = "favoriteLocations"
+        static let showAISummary = "showAISummary"
     }
 
     #if DEBUG

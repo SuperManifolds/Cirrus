@@ -44,6 +44,12 @@ struct CirrusApp: App {
         .onChange(of: settingsViewModel.pinnedLocation) { _, _ in
             handleLocationChange(useCurrentLocation: settingsViewModel.useCurrentLocation)
         }
+        .onChange(of: settingsViewModel.showAISummary) { _, enabled in
+            weatherViewModel?.enableAISummary = enabled
+        }
+        .onChange(of: settingsViewModel.temperatureUnit) { _, unit in
+            weatherViewModel?.temperatureUnit = unit
+        }
 
         Settings {
             if let searchVM = locationSearchViewModel {
@@ -68,6 +74,8 @@ struct CirrusApp: App {
             weatherProvider: provider,
             locationProvider: locService
         )
+        weatherVM.enableAISummary = settings.showAISummary
+        weatherVM.temperatureUnit = settings.temperatureUnit
         _weatherViewModel = State(wrappedValue: weatherVM)
         _locationSearchViewModel = State(wrappedValue: LocationSearchViewModel(locationProvider: locService))
 
@@ -78,6 +86,8 @@ struct CirrusApp: App {
         }
 
         weatherVM.startAutoRefresh(interval: settings.refreshInterval.duration)
+
+        Task { await weatherVM.refresh() }
     }
 
     private func handleLocationChange(useCurrentLocation: Bool) {

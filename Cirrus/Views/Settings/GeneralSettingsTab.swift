@@ -1,3 +1,4 @@
+import FoundationModels
 import SwiftUI
 
 struct GeneralSettingsTab: View {
@@ -26,6 +27,10 @@ struct GeneralSettingsTab: View {
             Toggle(String(localized: "Colored Menu Bar Icon"), isOn: $settingsViewModel.coloredMenuBarIcon)
 
             Toggle(String(localized: "Show Air Quality"), isOn: $settingsViewModel.showAirQuality)
+
+            if SystemLanguageModel.default.availability == .available {
+                Toggle(String(localized: "AI Weather Summary"), isOn: $settingsViewModel.showAISummary)
+            }
 
             Toggle(String(localized: "Launch at Login"), isOn: $settingsViewModel.launchAtLogin)
         }

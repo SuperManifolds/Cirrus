@@ -22,6 +22,7 @@ struct MenuBarView: View {
                     isPinnedLocation: !settingsViewModel.useCurrentLocation,
                     airQuality: settingsViewModel.showAirQuality ? weatherViewModel.airQuality : nil,
                     pollen: settingsViewModel.showAirQuality ? weatherViewModel.pollen : nil,
+                    summary: settingsViewModel.showAISummary ? weatherViewModel.summary : nil,
                     unit: settingsViewModel.temperatureUnit,
                     locationSearchViewModel: locationSearchViewModel,
                     settingsViewModel: settingsViewModel,
