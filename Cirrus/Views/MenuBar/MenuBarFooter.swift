@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuBarFooter: View {
     let lastUpdated: Date?
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(spacing: 4) {
@@ -13,7 +14,12 @@ struct MenuBarFooter: View {
                     .padding(.bottom, 2)
             }
 
-            SettingsLink {
+            Button {
+                openSettings()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+            } label: {
                 Label(String(localized: "Settings..."), systemImage: "gear")
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
