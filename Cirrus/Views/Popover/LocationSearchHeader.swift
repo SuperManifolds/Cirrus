@@ -7,6 +7,7 @@ struct LocationSearchHeader: View {
     var onLocationSelected: (Location) -> Void
     var onUseCurrentLocation: () -> Void
     @State private var isSearching = false
+    @FocusState private var isTextFieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,6 +17,7 @@ struct LocationSearchHeader: View {
                         .foregroundStyle(.secondary)
                     TextField(String(localized: "Search city..."), text: $searchViewModel.searchText)
                         .textFieldStyle(.plain)
+                        .focused($isTextFieldFocused)
                     Button {
                         isSearching = false
                         searchViewModel.clearResults()
@@ -33,6 +35,7 @@ struct LocationSearchHeader: View {
             } else {
                 Button {
                     isSearching = true
+                    isTextFieldFocused = true
                 } label: {
                     HStack(spacing: 4) {
                         Text(locationName)

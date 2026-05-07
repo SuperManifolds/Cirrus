@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PrecipitationChartView: View {
     let minutely: [MinuteForecast]
+    @State private var hoveredIndex: Int?
 
     private var maxIntensity: Double {
         max(minutely.map(\.precipitationIntensity).max() ?? 0, 0.5)
@@ -9,19 +10,19 @@ struct PrecipitationChartView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(summaryText)
+            Text(hoveredIndex != nil ? tooltipText : summaryText)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .animation(.none, value: hoveredIndex)
 
             HStack(alignment: .bottom, spacing: 2) {
-                ForEach(minutely) { entry in
+                ForEach(Array(minutely.enumerated()), id: \.element.id) { index, entry in
                     RoundedRectangle(cornerRadius: LayoutConstants.Size.precipBarCornerRadius)
-                        .fill(
-                            entry.precipitationIntensity > 0
-                                ? Color.cyan
-                                : Color.cyan.opacity(LayoutConstants.Opacity.precipBarEmpty)
-                        )
+                        .fill(barColor(index: index, intensity: entry.precipitationIntensity))
                         .frame(height: barHeight(for: entry.precipitationIntensity))
+                        .onHover { hovering in
+                            hoveredIndex = hovering ? index : nil
+                        }
                 }
             }
             .frame(height: LayoutConstants.Size.precipBarHeight)
@@ -42,12 +43,33 @@ struct PrecipitationChartView: View {
         .padding(.vertical, 8)
     }
 
+    private func barColor(index: Int, intensity: Double) -> Color {
+        if index == hoveredIndex {
+            return .cyan.opacity(0.9)
+        }
+        return intensity > 0 ? .cyan : .cyan.opacity(LayoutConstants.Opacity.precipBarEmpty)
+    }
+
     private func barHeight(for intensity: Double) -> CGFloat {
         let minHeight = LayoutConstants.Size.precipBarMinHeight
         let maxHeight = LayoutConstants.Size.precipBarHeight
         guard intensity > 0 else { return minHeight }
         let fraction = min(intensity / maxIntensity, 1.0)
         return minHeight + (maxHeight - minHeight) * fraction
+    }
+
+    private var tooltipText: String {
+        guard let index = hoveredIndex, minutely.indices.contains(index) else {
+            return summaryText
+        }
+        let entry = minutely[index]
+        let time = entry.date.formatted(date: .omitted, time: .shortened)
+        let measurement = Measurement(value: entry.precipitationIntensity, unit: UnitLength.millimeters)
+        let formatted = measurement.formatted(
+            .measurement(width: .abbreviated, usage: .rainfall,
+                         numberFormatStyle: .number.precision(.fractionLength(1)))
+        )
+        return "\(time) — \(formatted)/h"
     }
 
     private var summaryText: String {
