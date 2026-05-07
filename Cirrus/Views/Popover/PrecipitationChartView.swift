@@ -3,12 +3,6 @@ import SwiftUI
 struct PrecipitationChartView: View {
     let minutely: [MinuteForecast]
 
-    private static let timeFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
-
     private var maxIntensity: Double {
         max(minutely.map(\.precipitationIntensity).max() ?? 0, 0.5)
     }
@@ -30,11 +24,11 @@ struct PrecipitationChartView: View {
 
             HStack {
                 if let first = minutely.first {
-                    Text(Self.timeFormatter.string(from: first.date))
+                    Text(first.date.formatted(date: .omitted, time: .shortened))
                 }
                 Spacer()
                 if let last = minutely.last {
-                    Text(Self.timeFormatter.string(from: last.date))
+                    Text(last.date.formatted(date: .omitted, time: .shortened))
                 }
             }
             .font(.caption2)

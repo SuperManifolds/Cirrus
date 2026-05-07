@@ -6,19 +6,13 @@ struct DailyForecastRow: View {
     let weekMin: Double
     let weekMax: Double
 
-    private static let dayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEE"
-        return formatter
-    }()
-
     private var isToday: Bool {
         Calendar.current.isDateInToday(forecast.date)
     }
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(isToday ? String(localized: "Today") : Self.dayFormatter.string(from: forecast.date))
+            Text(isToday ? String(localized: "Today") : forecast.date.formatted(.dateTime.weekday(.abbreviated)))
                 .font(.callout)
                 .frame(width: 44, alignment: .leading)
 

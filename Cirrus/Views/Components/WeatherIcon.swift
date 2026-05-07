@@ -8,7 +8,19 @@ struct WeatherIcon: View {
     var body: some View {
         Image(systemName: condition.symbol(isDaytime: isDaytime))
             .symbolRenderingMode(.multicolor)
+            .foregroundStyle(tintColor)
             .font(.system(size: size))
+    }
+
+    private var tintColor: Color {
+        switch condition {
+            case .clear, .mainlyClear: .yellow
+            case .partlyCloudy: .blue
+            case .cloudy, .fog: .gray
+            case .rain, .heavyRain, .showers, .heavyShowers, .drizzle: .cyan
+            case .snow, .heavySnow, .snowShowers, .sleet, .freezingDrizzle, .freezingRain: .blue
+            case .thunderstorm, .thunderstormWithHail: .orange
+        }
     }
 }
 

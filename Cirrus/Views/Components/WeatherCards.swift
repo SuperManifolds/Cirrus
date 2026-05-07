@@ -17,9 +17,7 @@ struct WindCard: WeatherCard {
     var iconColor: Color { .teal }
     var isRelevant: Bool { current.windSpeed.converted(to: .kilometersPerHour).value >= 1 }
     var value: String {
-        let speed = current.windSpeed.formattedKmh
-        let dir = compassDirection(from: current.windDirection)
-        return "\(speed) \(dir)"
+        "\(current.windSpeed.formattedWindSpeed) \(compassDirection(from: current.windDirection))"
     }
 }
 
@@ -37,7 +35,7 @@ struct UVIndexCard: WeatherCard {
     var title: String { String(localized: "UV Index") }
     var icon: String { "sun.max.fill" }
     var iconColor: Color { .orange }
-    var isRelevant: Bool { current.isDaytime && current.uvIndex >= 1 }
+    var isRelevant: Bool { current.isDaytime && current.uvIndex >= 3 }
     var value: String { "\(Int(current.uvIndex))" }
 }
 
@@ -50,9 +48,7 @@ struct PressureCard: WeatherCard {
         let hPa = Int(current.pressure.converted(to: .hectopascals).value)
         return hPa < 1000 || hPa > 1025
     }
-    var value: String {
-        "\(Int(current.pressure.converted(to: .hectopascals).value)) hPa"
-    }
+    var value: String { current.pressure.formattedPressure }
 }
 
 struct CloudCoverCard: WeatherCard {
@@ -74,9 +70,7 @@ struct VisibilityCard: WeatherCard {
         return visibility.converted(to: .kilometers).value < 10
     }
     var value: String {
-        guard let visibility = current.visibility else { return "" }
-        let km = visibility.converted(to: .kilometers).value
-        return km >= 1 ? "\(Int(km)) km" : String(format: "%.1f km", km)
+        current.visibility?.formattedVisibility ?? ""
     }
 }
 
@@ -104,8 +98,7 @@ struct SnowDepthCard: WeatherCard {
         return depth.converted(to: .centimeters).value >= 1
     }
     var value: String {
-        guard let depth = current.snowDepth else { return "" }
-        return "\(Int(depth.converted(to: .centimeters).value)) cm"
+        current.snowDepth?.formattedSnowDepth ?? ""
     }
 }
 
@@ -117,13 +110,8 @@ struct SunriseCard: WeatherCard {
     var isRelevant: Bool { today?.sunrise != nil }
     var value: String {
         guard let sunrise = today?.sunrise else { return "" }
-        return Self.formatter.string(from: sunrise)
+        return sunrise.formatted(date: .omitted, time: .shortened)
     }
-    private static let formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
 }
 
 struct SunsetCard: WeatherCard {
@@ -134,11 +122,6 @@ struct SunsetCard: WeatherCard {
     var isRelevant: Bool { today?.sunset != nil }
     var value: String {
         guard let sunset = today?.sunset else { return "" }
-        return Self.formatter.string(from: sunset)
+        return sunset.formatted(date: .omitted, time: .shortened)
     }
-    private static let formatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
-        return formatter
-    }()
 }

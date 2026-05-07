@@ -5,15 +5,9 @@ struct HourlyForecastRow: View {
     let unit: TemperatureUnit
     let isNow: Bool
 
-    private static let hourFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH"
-        return formatter
-    }()
-
     var body: some View {
         VStack(spacing: 6) {
-            Text(isNow ? String(localized: "Now") : Self.hourFormatter.string(from: forecast.date))
+            Text(isNow ? String(localized: "Now") : forecast.date.formatted(.dateTime.hour()))
                 .font(.caption2)
                 .foregroundStyle(isNow ? .primary : .secondary)
 
