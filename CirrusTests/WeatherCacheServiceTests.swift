@@ -90,6 +90,7 @@ struct WeatherCacheServiceTests {
             current: CurrentWeather(
                 temperature: Measurement(value: 20, unit: .celsius),
                 apparentTemperature: Measurement(value: 18, unit: .celsius),
+                dewPoint: nil,
                 condition: .clear,
                 humidity: 50,
                 windSpeed: Measurement(value: 10, unit: .kilometersPerHour),
@@ -98,13 +99,18 @@ struct WeatherCacheServiceTests {
                 pressure: Measurement(value: 1013, unit: .hectopascals),
                 uvIndex: 3,
                 cloudCover: 10,
+                visibility: Measurement(value: 10000, unit: .meters),
                 precipitation: Measurement(value: 0, unit: .millimeters),
+                rain: nil,
+                snowfall: nil,
+                snowDepth: nil,
                 isDaytime: true,
                 timestamp: Date()
             ),
             hourly: [],
             daily: [],
             minutely: nil,
+            alerts: [],
             location: location,
             fetchedAt: Date(),
             provider: .openMeteo

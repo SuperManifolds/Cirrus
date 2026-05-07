@@ -89,8 +89,11 @@ struct DailyForecastRow: View {
                 condition: .partlyCloudy,
                 precipitationProbability: 20,
                 precipitationSum: Measurement(value: 1, unit: .millimeters),
+                rainSum: Measurement(value: 1, unit: .millimeters),
+                snowfallSum: nil,
                 uvIndexMax: 6,
                 windSpeedMax: Measurement(value: 20, unit: .kilometersPerHour),
+                windDirectionDominant: 180,
                 sunrise: nil,
                 sunset: nil
             ),

@@ -15,8 +15,9 @@ struct OpenMeteoService: WeatherProviding {
 
     private static let currentParams = [
         "temperature_2m", "relative_humidity_2m", "apparent_temperature",
-        "weather_code", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m",
-        "precipitation", "cloud_cover", "pressure_msl", "uv_index", "is_day"
+        "dew_point_2m", "weather_code", "wind_speed_10m", "wind_direction_10m",
+        "wind_gusts_10m", "precipitation", "rain", "snowfall", "snow_depth",
+        "cloud_cover", "pressure_msl", "uv_index", "visibility", "is_day"
     ].joined(separator: ",")
 
     private static let hourlyParams = [
@@ -28,7 +29,9 @@ struct OpenMeteoService: WeatherProviding {
     private static let dailyParams = [
         "temperature_2m_max", "temperature_2m_min", "weather_code",
         "precipitation_probability_max", "precipitation_sum",
-        "uv_index_max", "wind_speed_10m_max", "sunrise", "sunset"
+        "rain_sum", "snowfall_sum",
+        "uv_index_max", "wind_speed_10m_max", "wind_direction_10m_dominant",
+        "sunrise", "sunset"
     ].joined(separator: ",")
 
     private static let minutely15Params = "precipitation"
@@ -114,7 +117,7 @@ struct OpenMeteoService: WeatherProviding {
         let minutely = nowcast ?? mapMinutely(response.minutely15)
         return WeatherSnapshot(
             current: current, hourly: hourly, daily: daily, minutely: minutely,
-            location: location, fetchedAt: Date(), provider: .openMeteo
+            alerts: [], location: location, fetchedAt: Date(), provider: .openMeteo
         )
     }
 
@@ -122,6 +125,7 @@ struct OpenMeteoService: WeatherProviding {
         CurrentWeather(
             temperature: Measurement(value: om.temperature2m, unit: .celsius),
             apparentTemperature: Measurement(value: om.apparentTemperature, unit: .celsius),
+            dewPoint: Measurement(value: om.dewPoint2m, unit: .celsius),
             condition: WeatherCondition(wmoCode: om.weatherCode),
             humidity: om.relativeHumidity2m,
             windSpeed: Measurement(value: om.windSpeed10m, unit: .kilometersPerHour),
@@ -130,7 +134,11 @@ struct OpenMeteoService: WeatherProviding {
             pressure: Measurement(value: om.pressureMsl, unit: .hectopascals),
             uvIndex: om.uvIndex,
             cloudCover: om.cloudCover,
+            visibility: Measurement(value: om.visibility, unit: .meters),
             precipitation: Measurement(value: om.precipitation, unit: .millimeters),
+            rain: Measurement(value: om.rain, unit: .millimeters),
+            snowfall: Measurement(value: om.snowfall, unit: .centimeters),
+            snowDepth: Measurement(value: om.snowDepth, unit: .meters),
             isDaytime: om.isDay == 1,
             timestamp: om.time
         )
@@ -169,6 +177,8 @@ struct OpenMeteoService: WeatherProviding {
             let low: Measurement<UnitTemperature> = Measurement(value: om.temperature2mMin[idx], unit: .celsius)
             let precipSum: Measurement<UnitLength> = Measurement(value: om.precipitationSum[idx], unit: .millimeters)
             let wind: Measurement<UnitSpeed> = Measurement(value: om.windSpeed10mMax[idx], unit: .kilometersPerHour)
+            let rainSum: Measurement<UnitLength> = Measurement(value: om.rainSum[idx], unit: .millimeters)
+            let snowSum: Measurement<UnitLength> = Measurement(value: om.snowfallSum[idx], unit: .centimeters)
             results.append(DailyForecast(
                 date: om.time[idx],
                 highTemperature: high,
@@ -176,8 +186,11 @@ struct OpenMeteoService: WeatherProviding {
                 condition: WeatherCondition(wmoCode: om.weatherCode[idx]),
                 precipitationProbability: om.precipitationProbabilityMax[idx],
                 precipitationSum: precipSum,
+                rainSum: rainSum,
+                snowfallSum: snowSum,
                 uvIndexMax: om.uvIndexMax[idx],
                 windSpeedMax: wind,
+                windDirectionDominant: om.windDirection10mDominant[idx],
                 sunrise: om.sunrise[idx],
                 sunset: om.sunset[idx]
             ))
@@ -249,14 +262,19 @@ private struct OpenMeteoCurrent: Decodable {
     let temperature2m: Double
     let relativeHumidity2m: Double
     let apparentTemperature: Double
+    let dewPoint2m: Double
     let weatherCode: Int
     let windSpeed10m: Double
     let windDirection10m: Double
     let windGusts10m: Double
     let precipitation: Double
+    let rain: Double
+    let snowfall: Double
+    let snowDepth: Double
     let cloudCover: Double
     let pressureMsl: Double
     let uvIndex: Double
+    let visibility: Double
     let isDay: Int
 
     enum CodingKeys: String, CodingKey {
@@ -264,14 +282,17 @@ private struct OpenMeteoCurrent: Decodable {
         case temperature2m = "temperature_2m"
         case relativeHumidity2m = "relative_humidity_2m"
         case apparentTemperature = "apparent_temperature"
+        case dewPoint2m = "dew_point_2m"
         case weatherCode = "weather_code"
         case windSpeed10m = "wind_speed_10m"
         case windDirection10m = "wind_direction_10m"
         case windGusts10m = "wind_gusts_10m"
-        case precipitation
+        case precipitation, rain, snowfall
+        case snowDepth = "snow_depth"
         case cloudCover = "cloud_cover"
         case pressureMsl = "pressure_msl"
         case uvIndex = "uv_index"
+        case visibility
         case isDay = "is_day"
     }
 }
@@ -307,8 +328,11 @@ private struct OpenMeteoDaily: Decodable {
     let weatherCode: [Int]
     let precipitationProbabilityMax: [Double]
     let precipitationSum: [Double]
+    let rainSum: [Double]
+    let snowfallSum: [Double]
     let uvIndexMax: [Double]
     let windSpeed10mMax: [Double]
+    let windDirection10mDominant: [Double]
     let sunrise: [Date?]
     let sunset: [Date?]
 
@@ -319,8 +343,11 @@ private struct OpenMeteoDaily: Decodable {
         case weatherCode = "weather_code"
         case precipitationProbabilityMax = "precipitation_probability_max"
         case precipitationSum = "precipitation_sum"
+        case rainSum = "rain_sum"
+        case snowfallSum = "snowfall_sum"
         case uvIndexMax = "uv_index_max"
         case windSpeed10mMax = "wind_speed_10m_max"
+        case windDirection10mDominant = "wind_direction_10m_dominant"
         case sunrise, sunset
     }
 }

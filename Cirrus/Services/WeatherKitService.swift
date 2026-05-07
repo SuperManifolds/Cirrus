@@ -13,11 +13,13 @@ struct WeatherKitService: WeatherProviding {
         let hourlyForecast: Forecast<HourWeather>
         let dailyForecast: Forecast<DayWeather>
         let minuteForecast: Forecast<MinuteWeather>?
+        let weatherAlerts: [WeatherKit.WeatherAlert]?
         do {
-            (currentWeather, hourlyForecast, dailyForecast, minuteForecast) = try await service.weather(
-                for: clLocation,
-                including: .current, .hourly, .daily, .minute
-            )
+            (currentWeather, hourlyForecast, dailyForecast, minuteForecast, weatherAlerts) =
+                try await service.weather(
+                    for: clLocation,
+                    including: .current, .hourly, .daily, .minute, .alerts
+                )
         } catch {
             throw WeatherProviderError.networkError(underlying: error)
         }
@@ -26,10 +28,11 @@ struct WeatherKitService: WeatherProviding {
         let hourly = mapHourly(hourlyForecast)
         let daily = mapDaily(dailyForecast)
         let minutely = mapMinutely(minuteForecast)
+        let alerts = mapAlerts(weatherAlerts)
 
         return WeatherSnapshot(
             current: current, hourly: hourly, daily: daily, minutely: minutely,
-            location: location, fetchedAt: Date(), provider: .weatherKit
+            alerts: alerts, location: location, fetchedAt: Date(), provider: .weatherKit
         )
     }
 
@@ -37,6 +40,7 @@ struct WeatherKitService: WeatherProviding {
         CurrentWeather(
             temperature: wk.temperature,
             apparentTemperature: wk.apparentTemperature,
+            dewPoint: wk.dewPoint,
             condition: WeatherCondition(weatherKitCondition: wk.condition),
             humidity: wk.humidity * 100,
             windSpeed: wk.wind.speed,
@@ -45,7 +49,11 @@ struct WeatherKitService: WeatherProviding {
             pressure: wk.pressure,
             uvIndex: Double(wk.uvIndex.value),
             cloudCover: wk.cloudCover * 100,
+            visibility: wk.visibility,
             precipitation: Measurement(value: 0, unit: .millimeters),
+            rain: nil,
+            snowfall: nil,
+            snowDepth: nil,
             isDaytime: wk.isDaylight,
             timestamp: wk.date
         )
@@ -76,10 +84,36 @@ struct WeatherKitService: WeatherProviding {
                 condition: WeatherCondition(weatherKitCondition: day.condition),
                 precipitationProbability: day.precipitationChance * 100,
                 precipitationSum: Measurement(value: 0, unit: .millimeters),
+                rainSum: nil,
+                snowfallSum: nil,
                 uvIndexMax: Double(day.uvIndex.value),
                 windSpeedMax: day.wind.speed,
+                windDirectionDominant: nil,
                 sunrise: day.sun.sunrise,
                 sunset: day.sun.sunset
+            )
+        }
+    }
+
+    private func mapAlerts(_ alerts: [WeatherKit.WeatherAlert]?) -> [WeatherAlert] {
+        guard let alerts else { return [] }
+        return alerts.map { alert in
+            let severity: AlertSeverity = switch alert.severity {
+                case .extreme: .extreme
+                case .severe: .severe
+                case .moderate: .moderate
+                case .minor: .minor
+                @unknown default: .unknown
+            }
+            return WeatherAlert(
+                id: UUID().uuidString,
+                event: alert.summary,
+                severity: severity,
+                headline: alert.summary,
+                description: alert.detailsURL.absoluteString,
+                startDate: alert.metadata.date,
+                endDate: alert.metadata.expirationDate,
+                source: alert.source
             )
         }
     }

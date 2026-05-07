@@ -4,13 +4,19 @@ struct WeatherDetailCard: View {
     let title: String
     let value: String
     let icon: String
+    var iconColor: Color = .secondary
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Label(title, systemImage: icon)
-                .font(.caption2)
-                .textCase(.uppercase)
-                .foregroundStyle(.secondary)
+            Label {
+                Text(title)
+            } icon: {
+                Image(systemName: icon)
+                    .foregroundStyle(iconColor)
+            }
+            .font(.caption2)
+            .textCase(.uppercase)
+            .foregroundStyle(.secondary)
             Text(value)
                 .font(.callout)
                 .fontWeight(.medium)

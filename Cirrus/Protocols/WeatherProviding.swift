@@ -38,6 +38,7 @@ struct MockWeatherProvider: WeatherProviding {
         let current = CurrentWeather(
             temperature: Measurement(value: 22, unit: .celsius),
             apparentTemperature: Measurement(value: 20, unit: .celsius),
+            dewPoint: Measurement(value: 12, unit: .celsius),
             condition: .partlyCloudy,
             humidity: 55,
             windSpeed: Measurement(value: 12, unit: .kilometersPerHour),
@@ -46,7 +47,11 @@ struct MockWeatherProvider: WeatherProviding {
             pressure: Measurement(value: 1013, unit: .hectopascals),
             uvIndex: 5,
             cloudCover: 40,
+            visibility: Measurement(value: 10000, unit: .meters),
             precipitation: Measurement(value: 0, unit: .millimeters),
+            rain: Measurement(value: 0, unit: .millimeters),
+            snowfall: nil,
+            snowDepth: nil,
             isDaytime: true,
             timestamp: Date()
         )
@@ -58,6 +63,7 @@ struct MockWeatherProvider: WeatherProviding {
             hourly: hourly,
             daily: daily,
             minutely: minutely,
+            alerts: [],
             location: location,
             fetchedAt: Date(),
             provider: .openMeteo
@@ -98,7 +104,8 @@ struct MockWeatherProvider: WeatherProviding {
                 date: date, highTemperature: high, lowTemperature: low,
                 condition: conditions[day % conditions.count],
                 precipitationProbability: Double(day % 5) * 15,
-                precipitationSum: precipSum, uvIndexMax: 6, windSpeedMax: wind,
+                precipitationSum: precipSum, rainSum: precipSum, snowfallSum: nil,
+                uvIndexMax: 6, windSpeedMax: wind, windDirectionDominant: 225,
                 sunrise: Calendar.current.date(bySettingHour: 6, minute: 30, second: 0, of: date),
                 sunset: Calendar.current.date(bySettingHour: 21, minute: 0, second: 0, of: date)
             ))

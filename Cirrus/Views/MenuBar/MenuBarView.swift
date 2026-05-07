@@ -7,8 +7,14 @@ struct MenuBarView: View {
     var body: some View {
         VStack(spacing: 0) {
             if let snapshot = weatherViewModel.snapshot {
+                if !snapshot.alerts.isEmpty {
+                    WeatherAlertBanner(alerts: snapshot.alerts)
+                    Divider()
+                }
+
                 CurrentConditionsView(
                     current: snapshot.current,
+                    today: snapshot.daily.first,
                     locationName: snapshot.location.name,
                     unit: settingsViewModel.temperatureUnit
                 )
