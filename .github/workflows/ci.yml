@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & Lint
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve packages
+        run: xcodebuild -project Cirrus.xcodeproj -scheme Cirrus -resolvePackageDependencies
+
+      - name: Build
+        run: |
+          xcodebuild -project Cirrus.xcodeproj \
+            -scheme Cirrus \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: SwiftLint
+        run: |
+          brew install swiftlint
+          swiftlint lint --strict

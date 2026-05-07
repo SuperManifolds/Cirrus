@@ -1,0 +1,288 @@
+import Foundation
+import OSLog
+
+struct OpenMeteoService: WeatherProviding {
+    let kind: WeatherProviderKind = .openMeteo
+    private let session: URLSession
+
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
+
+    private static let baseURL = "https://api.open-meteo.com/v1/forecast"
+
+    private static let currentParams = [
+        "temperature_2m", "relative_humidity_2m", "apparent_temperature",
+        "weather_code", "wind_speed_10m", "wind_direction_10m", "wind_gusts_10m",
+        "precipitation", "cloud_cover", "pressure_msl", "uv_index", "is_day"
+    ].joined(separator: ",")
+
+    private static let hourlyParams = [
+        "temperature_2m", "relative_humidity_2m", "apparent_temperature",
+        "weather_code", "precipitation_probability", "precipitation",
+        "wind_speed_10m", "is_day"
+    ].joined(separator: ",")
+
+    private static let dailyParams = [
+        "temperature_2m_max", "temperature_2m_min", "weather_code",
+        "precipitation_probability_max", "precipitation_sum",
+        "uv_index_max", "wind_speed_10m_max", "sunrise", "sunset"
+    ].joined(separator: ",")
+
+    func fetchWeather(for location: Location) async throws -> WeatherSnapshot {
+        let url = try buildURL(for: location)
+        Log.api.debug("Fetching Open-Meteo: \(url)")
+
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(from: url)
+        } catch {
+            throw WeatherProviderError.networkError(underlying: error)
+        }
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw WeatherProviderError.networkError(underlying: URLError(.badServerResponse))
+        }
+
+        if httpResponse.statusCode == 429 {
+            throw WeatherProviderError.rateLimited
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw WeatherProviderError.networkError(underlying: URLError(.badServerResponse))
+        }
+
+        let decoded: OpenMeteoResponse
+        do {
+            // First pass: extract timezone from response
+            let meta = try JSONDecoder().decode(OpenMeteoTimezone.self, from: data)
+            let tz = TimeZone(identifier: meta.timezone) ?? .current
+
+            // Second pass: decode full response with correct timezone
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .custom { decoder in
+                try Self.decodeOpenMeteoDate(decoder: decoder, timeZone: tz)
+            }
+            decoded = try decoder.decode(OpenMeteoResponse.self, from: data)
+        } catch {
+            throw WeatherProviderError.decodingError(underlying: error)
+        }
+
+        return mapToSnapshot(decoded, location: location)
+    }
+
+    private func buildURL(for location: Location) throws -> URL {
+        guard var components = URLComponents(string: Self.baseURL) else {
+            throw WeatherProviderError.networkError(underlying: URLError(.badURL))
+        }
+        components.queryItems = [
+            URLQueryItem(name: "latitude", value: String(location.latitude)),
+            URLQueryItem(name: "longitude", value: String(location.longitude)),
+            URLQueryItem(name: "current", value: Self.currentParams),
+            URLQueryItem(name: "hourly", value: Self.hourlyParams),
+            URLQueryItem(name: "daily", value: Self.dailyParams),
+            URLQueryItem(name: "timezone", value: "auto"),
+            URLQueryItem(name: "forecast_days", value: "10"),
+            URLQueryItem(name: "forecast_hours", value: "24")
+        ]
+        guard let url = components.url else {
+            throw WeatherProviderError.networkError(underlying: URLError(.badURL))
+        }
+        return url
+    }
+
+    private func mapToSnapshot(_ response: OpenMeteoResponse, location: Location) -> WeatherSnapshot {
+        let current = mapCurrent(response.current)
+        let hourly = mapHourly(response.hourly)
+        let daily = mapDaily(response.daily)
+        return WeatherSnapshot(
+            current: current, hourly: hourly, daily: daily,
+            location: location, fetchedAt: Date(), provider: .openMeteo
+        )
+    }
+
+    private func mapCurrent(_ om: OpenMeteoCurrent) -> CurrentWeather {
+        CurrentWeather(
+            temperature: Measurement(value: om.temperature2m, unit: .celsius),
+            apparentTemperature: Measurement(value: om.apparentTemperature, unit: .celsius),
+            condition: WeatherCondition(wmoCode: om.weatherCode),
+            humidity: om.relativeHumidity2m,
+            windSpeed: Measurement(value: om.windSpeed10m, unit: .kilometersPerHour),
+            windDirection: om.windDirection10m,
+            windGusts: Measurement(value: om.windGusts10m, unit: .kilometersPerHour),
+            pressure: Measurement(value: om.pressureMsl, unit: .hectopascals),
+            uvIndex: om.uvIndex,
+            cloudCover: om.cloudCover,
+            precipitation: Measurement(value: om.precipitation, unit: .millimeters),
+            isDaytime: om.isDay == 1,
+            timestamp: om.time
+        )
+    }
+
+    private func mapHourly(_ om: OpenMeteoHourly) -> [HourlyForecast] {
+        let count = om.time.count
+        var results: [HourlyForecast] = []
+        results.reserveCapacity(count)
+        for idx in 0..<count {
+            let temp: Measurement<UnitTemperature> = Measurement(value: om.temperature2m[idx], unit: .celsius)
+            let apparent: Measurement<UnitTemperature> = Measurement(value: om.apparentTemperature[idx], unit: .celsius)
+            let wind: Measurement<UnitSpeed> = Measurement(value: om.windSpeed10m[idx], unit: .kilometersPerHour)
+            let precip: Measurement<UnitLength> = Measurement(value: om.precipitation[idx], unit: .millimeters)
+            results.append(HourlyForecast(
+                date: om.time[idx],
+                temperature: temp,
+                apparentTemperature: apparent,
+                condition: WeatherCondition(wmoCode: om.weatherCode[idx]),
+                precipitationProbability: om.precipitationProbability[idx],
+                precipitation: precip,
+                humidity: om.relativeHumidity2m[idx],
+                windSpeed: wind,
+                isDaytime: om.isDay[idx] == 1
+            ))
+        }
+        return results
+    }
+
+    private func mapDaily(_ om: OpenMeteoDaily) -> [DailyForecast] {
+        let count = om.time.count
+        var results: [DailyForecast] = []
+        results.reserveCapacity(count)
+        for idx in 0..<count {
+            let high: Measurement<UnitTemperature> = Measurement(value: om.temperature2mMax[idx], unit: .celsius)
+            let low: Measurement<UnitTemperature> = Measurement(value: om.temperature2mMin[idx], unit: .celsius)
+            let precipSum: Measurement<UnitLength> = Measurement(value: om.precipitationSum[idx], unit: .millimeters)
+            let wind: Measurement<UnitSpeed> = Measurement(value: om.windSpeed10mMax[idx], unit: .kilometersPerHour)
+            results.append(DailyForecast(
+                date: om.time[idx],
+                highTemperature: high,
+                lowTemperature: low,
+                condition: WeatherCondition(wmoCode: om.weatherCode[idx]),
+                precipitationProbability: om.precipitationProbabilityMax[idx],
+                precipitationSum: precipSum,
+                uvIndexMax: om.uvIndexMax[idx],
+                windSpeedMax: wind,
+                sunrise: om.sunrise[idx],
+                sunset: om.sunset[idx]
+            ))
+        }
+        return results
+    }
+
+    private static func decodeOpenMeteoDate(decoder: Decoder, timeZone: TimeZone) throws -> Date {
+        let container = try decoder.singleValueContainer()
+        let string = try container.decode(String.self)
+
+        let dtFormatter = DateFormatter()
+        dtFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dtFormatter.timeZone = timeZone
+
+        dtFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
+        if let date = dtFormatter.date(from: string) {
+            return date
+        }
+
+        dtFormatter.dateFormat = "yyyy-MM-dd"
+        if let date = dtFormatter.date(from: string) {
+            return date
+        }
+
+        throw DecodingError.dataCorruptedError(
+            in: container,
+            debugDescription: "Cannot decode date: \(string)"
+        )
+    }
+}
+
+// MARK: - Response Models
+
+private struct OpenMeteoTimezone: Decodable {
+    let timezone: String
+}
+
+private struct OpenMeteoResponse: Decodable {
+    let current: OpenMeteoCurrent
+    let hourly: OpenMeteoHourly
+    let daily: OpenMeteoDaily
+}
+
+private struct OpenMeteoCurrent: Decodable {
+    let time: Date
+    let temperature2m: Double
+    let relativeHumidity2m: Double
+    let apparentTemperature: Double
+    let weatherCode: Int
+    let windSpeed10m: Double
+    let windDirection10m: Double
+    let windGusts10m: Double
+    let precipitation: Double
+    let cloudCover: Double
+    let pressureMsl: Double
+    let uvIndex: Double
+    let isDay: Int
+
+    enum CodingKeys: String, CodingKey {
+        case time
+        case temperature2m = "temperature_2m"
+        case relativeHumidity2m = "relative_humidity_2m"
+        case apparentTemperature = "apparent_temperature"
+        case weatherCode = "weather_code"
+        case windSpeed10m = "wind_speed_10m"
+        case windDirection10m = "wind_direction_10m"
+        case windGusts10m = "wind_gusts_10m"
+        case precipitation
+        case cloudCover = "cloud_cover"
+        case pressureMsl = "pressure_msl"
+        case uvIndex = "uv_index"
+        case isDay = "is_day"
+    }
+}
+
+private struct OpenMeteoHourly: Decodable {
+    let time: [Date]
+    let temperature2m: [Double]
+    let relativeHumidity2m: [Double]
+    let apparentTemperature: [Double]
+    let weatherCode: [Int]
+    let precipitationProbability: [Double]
+    let precipitation: [Double]
+    let windSpeed10m: [Double]
+    let isDay: [Int]
+
+    enum CodingKeys: String, CodingKey {
+        case time
+        case temperature2m = "temperature_2m"
+        case relativeHumidity2m = "relative_humidity_2m"
+        case apparentTemperature = "apparent_temperature"
+        case weatherCode = "weather_code"
+        case precipitationProbability = "precipitation_probability"
+        case precipitation
+        case windSpeed10m = "wind_speed_10m"
+        case isDay = "is_day"
+    }
+}
+
+private struct OpenMeteoDaily: Decodable {
+    let time: [Date]
+    let temperature2mMax: [Double]
+    let temperature2mMin: [Double]
+    let weatherCode: [Int]
+    let precipitationProbabilityMax: [Double]
+    let precipitationSum: [Double]
+    let uvIndexMax: [Double]
+    let windSpeed10mMax: [Double]
+    let sunrise: [Date?]
+    let sunset: [Date?]
+
+    enum CodingKeys: String, CodingKey {
+        case time
+        case temperature2mMax = "temperature_2m_max"
+        case temperature2mMin = "temperature_2m_min"
+        case weatherCode = "weather_code"
+        case precipitationProbabilityMax = "precipitation_probability_max"
+        case precipitationSum = "precipitation_sum"
+        case uvIndexMax = "uv_index_max"
+        case windSpeed10mMax = "wind_speed_10m_max"
+        case sunrise, sunset
+    }
+}
