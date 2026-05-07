@@ -1,6 +1,6 @@
 import Foundation
 
-struct WeatherSnapshot: Sendable {
+struct WeatherSnapshot: Sendable, Codable {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
     let daily: [DailyForecast]

@@ -1,6 +1,6 @@
 import Foundation
 
-struct CurrentWeather: Sendable {
+struct CurrentWeather: Sendable, Codable {
     let temperature: Measurement<UnitTemperature>
     let apparentTemperature: Measurement<UnitTemperature>
     let dewPoint: Measurement<UnitTemperature>?

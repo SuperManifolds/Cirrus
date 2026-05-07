@@ -14,7 +14,7 @@ struct WeatherCacheServiceTests {
     )
 
     @Test func storeAndRetrieve() async {
-        let cache = WeatherCacheService(maxAge: 60)
+        let cache = WeatherCacheService(maxAge: 60, persistToDisk: false)
         let snapshot = makeSnapshot(location: oslo)
         await cache.store(snapshot)
 
@@ -24,7 +24,7 @@ struct WeatherCacheServiceTests {
     }
 
     @Test func missForDifferentLocation() async {
-        let cache = WeatherCacheService(maxAge: 60)
+        let cache = WeatherCacheService(maxAge: 60, persistToDisk: false)
         await cache.store(makeSnapshot(location: oslo))
 
         let cached = await cache.get(for: bergen)
@@ -32,7 +32,7 @@ struct WeatherCacheServiceTests {
     }
 
     @Test func expiredEntryReturnsMiss() async {
-        let cache = WeatherCacheService(maxAge: 0)
+        let cache = WeatherCacheService(maxAge: 0, persistToDisk: false)
         await cache.store(makeSnapshot(location: oslo))
 
         // maxAge=0 means it's already expired
@@ -41,7 +41,7 @@ struct WeatherCacheServiceTests {
     }
 
     @Test func invalidateClearsAll() async {
-        let cache = WeatherCacheService(maxAge: 60)
+        let cache = WeatherCacheService(maxAge: 60, persistToDisk: false)
         await cache.store(makeSnapshot(location: oslo))
         await cache.store(makeSnapshot(location: bergen))
 
@@ -52,7 +52,7 @@ struct WeatherCacheServiceTests {
     }
 
     @Test func nearbyCoordinatesHitSameKey() async {
-        let cache = WeatherCacheService(maxAge: 60)
+        let cache = WeatherCacheService(maxAge: 60, persistToDisk: false)
         let loc1 = Location(
             name: "Oslo", latitude: 59.9100, longitude: 10.7500,
             country: nil, administrativeArea: nil
@@ -68,7 +68,7 @@ struct WeatherCacheServiceTests {
     }
 
     @Test func differentRoundedCoordinatesMiss() async {
-        let cache = WeatherCacheService(maxAge: 60)
+        let cache = WeatherCacheService(maxAge: 60, persistToDisk: false)
         let loc1 = Location(
             name: "A", latitude: 59.91, longitude: 10.75,
             country: nil, administrativeArea: nil

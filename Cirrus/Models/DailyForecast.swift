@@ -1,6 +1,6 @@
 import Foundation
 
-struct DailyForecast: Sendable, Identifiable {
+struct DailyForecast: Sendable, Codable, Identifiable {
     let date: Date
     let highTemperature: Measurement<UnitTemperature>
     let lowTemperature: Measurement<UnitTemperature>

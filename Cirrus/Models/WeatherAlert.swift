@@ -1,6 +1,6 @@
 import Foundation
 
-struct WeatherAlert: Sendable, Identifiable {
+struct WeatherAlert: Sendable, Codable, Identifiable {
     let id: String
     let event: String
     let severity: AlertSeverity
@@ -11,7 +11,7 @@ struct WeatherAlert: Sendable, Identifiable {
     let source: String?
 }
 
-enum AlertSeverity: String, Sendable {
+enum AlertSeverity: String, Sendable, Codable {
     case extreme
     case severe
     case moderate

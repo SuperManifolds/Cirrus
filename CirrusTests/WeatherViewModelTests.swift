@@ -12,9 +12,11 @@ struct WeatherViewModelTests {
         )
     ) -> (WeatherViewModel, MockLocationProvider) {
         let locProvider = MockLocationProvider(location: location)
+        let cache = WeatherCacheService(persistToDisk: false)
         let vm = WeatherViewModel(
             weatherProvider: MockWeatherProvider(),
-            locationProvider: locProvider
+            locationProvider: locProvider,
+            cache: cache
         )
         return (vm, locProvider)
     }
