@@ -22,10 +22,10 @@ struct WeatherAlertBanner: View {
 
                     Spacer()
                 }
-                .padding(8)
+                .padding(LayoutConstants.Padding.card)
                 .background(
                     color(for: alert.severity).opacity(0.1),
-                    in: RoundedRectangle(cornerRadius: 8)
+                    in: RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)
                 )
             }
         }

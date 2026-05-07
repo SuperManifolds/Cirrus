@@ -15,12 +15,16 @@ struct PrecipitationChartView: View {
 
             HStack(alignment: .bottom, spacing: 2) {
                 ForEach(minutely) { entry in
-                    RoundedRectangle(cornerRadius: 1.5)
-                        .fill(entry.precipitationIntensity > 0 ? Color.cyan : Color.cyan.opacity(0.15))
+                    RoundedRectangle(cornerRadius: LayoutConstants.Size.precipBarCornerRadius)
+                        .fill(
+                            entry.precipitationIntensity > 0
+                                ? Color.cyan
+                                : Color.cyan.opacity(LayoutConstants.Opacity.precipBarEmpty)
+                        )
                         .frame(height: barHeight(for: entry.precipitationIntensity))
                 }
             }
-            .frame(height: 30)
+            .frame(height: LayoutConstants.Size.precipBarHeight)
 
             HStack {
                 if let first = minutely.first {
@@ -39,8 +43,8 @@ struct PrecipitationChartView: View {
     }
 
     private func barHeight(for intensity: Double) -> CGFloat {
-        let minHeight: CGFloat = 2
-        let maxHeight: CGFloat = 30
+        let minHeight = LayoutConstants.Size.precipBarMinHeight
+        let maxHeight = LayoutConstants.Size.precipBarHeight
         guard intensity > 0 else { return minHeight }
         let fraction = min(intensity / maxIntensity, 1.0)
         return minHeight + (maxHeight - minHeight) * fraction

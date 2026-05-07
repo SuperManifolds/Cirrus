@@ -46,4 +46,10 @@ final class LocationSearchViewModel: ObservableObject {
             isSearching = false
         }
     }
+
+    #if DEBUG
+    static func preview() -> LocationSearchViewModel {
+        LocationSearchViewModel(locationProvider: MockLocationProvider())
+    }
+    #endif
 }

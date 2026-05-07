@@ -14,18 +14,26 @@ struct MenuBarLabel: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            icon
-            text
-        }
-    }
+            if settingsViewModel.coloredMenuBarIcon {
+                Image(nsImage: coloredIcon)
+            } else {
+                Image(systemName: symbolName)
+                    .symbolRenderingMode(.monochrome)
+            }
 
-    @ViewBuilder
-    private var icon: some View {
-        if settingsViewModel.coloredMenuBarIcon {
-            Image(nsImage: coloredIcon)
-        } else {
-            Image(systemName: symbolName)
-                .symbolRenderingMode(.monochrome)
+            switch settingsViewModel.menuBarDisplayMode {
+                case .iconOnly:
+                    EmptyView()
+                case .iconAndTemperature:
+                    if let temp = weatherViewModel.snapshot?.current.temperature {
+                        Text(temp.formatted(as: settingsViewModel.temperatureUnit))
+                    }
+                case .iconTemperatureAndCondition:
+                    if let current = weatherViewModel.snapshot?.current {
+                        let temp = current.temperature.formatted(as: settingsViewModel.temperatureUnit)
+                        Text("\(temp) \(current.condition.displayName)")
+                    }
+            }
         }
     }
 
@@ -59,23 +67,6 @@ struct MenuBarLabel: View {
                 return .systemOrange
             case .cloudy, .fog:
                 return .secondaryLabelColor
-        }
-    }
-
-    @ViewBuilder
-    private var text: some View {
-        switch settingsViewModel.menuBarDisplayMode {
-            case .iconOnly:
-                EmptyView()
-            case .iconAndTemperature:
-                if let temp = weatherViewModel.snapshot?.current.temperature {
-                    Text(temp.formatted(as: settingsViewModel.temperatureUnit))
-                }
-            case .iconTemperatureAndCondition:
-                if let current = weatherViewModel.snapshot?.current {
-                    let temp = current.temperature.formatted(as: settingsViewModel.temperatureUnit)
-                    Text("\(temp) \(current.condition.displayName)")
-                }
         }
     }
 }

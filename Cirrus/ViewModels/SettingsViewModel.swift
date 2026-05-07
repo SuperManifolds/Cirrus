@@ -99,6 +99,12 @@ final class SettingsViewModel: ObservableObject {
         static let pinnedLocation = "pinnedLocation"
         static let coloredMenuBarIcon = "coloredMenuBarIcon"
     }
+
+    #if DEBUG
+    static func preview() -> SettingsViewModel {
+        SettingsViewModel()
+    }
+    #endif
 }
 
 // MARK: - Display Mode

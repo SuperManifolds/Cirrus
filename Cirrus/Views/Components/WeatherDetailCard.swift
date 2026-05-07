@@ -22,20 +22,23 @@ struct WeatherDetailCard: View {
                 .fontWeight(.medium)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(8)
+        .padding(LayoutConstants.Padding.card)
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(.primary.opacity(0.2))
+            RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)
+                .fill(.primary.opacity(LayoutConstants.Opacity.cardFill))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)
                 .strokeBorder(
                     LinearGradient(
-                        colors: [.white.opacity(0.3), .white.opacity(0.08)],
+                        colors: [
+                            .white.opacity(LayoutConstants.Opacity.cardBorderTop),
+                            .white.opacity(LayoutConstants.Opacity.cardBorderBottom)
+                        ],
                         startPoint: .top,
                         endPoint: .bottom
                     ),
-                    lineWidth: 0.75
+                    lineWidth: LayoutConstants.Opacity.cardBorderWidth
                 )
         )
     }
@@ -48,6 +51,6 @@ struct WeatherDetailCard: View {
         WeatherDetailCard(title: "Humidity", value: "55%", icon: "humidity.fill")
     }
     .padding()
-    .frame(width: 320)
+    .frame(width: WeatherDefaults.popoverWidth)
 }
 #endif

@@ -3,6 +3,8 @@ import SwiftUI
 struct MenuBarView: View {
     @ObservedObject var weatherViewModel: WeatherViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
+    @ObservedObject var locationSearchViewModel: LocationSearchViewModel
+    let locationService: LocationService
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,7 +18,13 @@ struct MenuBarView: View {
                     current: snapshot.current,
                     today: snapshot.daily.first,
                     locationName: snapshot.location.name,
-                    unit: settingsViewModel.temperatureUnit
+                    unit: settingsViewModel.temperatureUnit,
+                    locationSearchViewModel: locationSearchViewModel,
+                    onLocationSelected: { location in
+                        settingsViewModel.pinnedLocation = location
+                        settingsViewModel.useCurrentLocation = false
+                        locationService.currentLocation = location
+                    }
                 )
 
                 if let minutely = snapshot.minutely, !minutely.isEmpty {
@@ -72,28 +80,9 @@ struct MenuBarView: View {
                 Divider()
             }
 
-            footer
+            MenuBarFooter()
         }
         .frame(width: WeatherDefaults.popoverWidth)
-    }
-
-    private var footer: some View {
-        VStack(spacing: 4) {
-            SettingsLink {
-                Label(String(localized: "Settings..."), systemImage: "gear")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(MenuBarButtonStyle())
-
-            Button {
-                NSApplication.shared.terminate(nil)
-            } label: {
-                Label(String(localized: "Quit Cirrus"), systemImage: "power")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(MenuBarButtonStyle())
-        }
-        .padding(8)
     }
 }
 
@@ -103,10 +92,14 @@ struct MenuBarButtonStyle: ButtonStyle {
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
             .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(.primary.opacity(configuration.isPressed ? 0.1 : 0.04))
+                RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.button)
+                    .fill(.primary.opacity(
+                        configuration.isPressed
+                            ? LayoutConstants.Opacity.buttonPressed
+                            : LayoutConstants.Opacity.buttonResting
+                    ))
             )
-            .contentShape(RoundedRectangle(cornerRadius: 6))
+            .contentShape(RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.button))
     }
 }
 
@@ -114,7 +107,9 @@ struct MenuBarButtonStyle: ButtonStyle {
 #Preview {
     MenuBarView(
         weatherViewModel: WeatherViewModel.preview(),
-        settingsViewModel: SettingsViewModel()
+        settingsViewModel: SettingsViewModel(),
+        locationSearchViewModel: LocationSearchViewModel(locationProvider: MockLocationProvider()),
+        locationService: LocationService()
     )
 }
 #endif

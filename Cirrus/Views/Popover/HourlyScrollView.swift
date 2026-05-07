@@ -13,7 +13,7 @@ struct HourlyScrollView: View {
             }
             .padding(.horizontal, 8)
         }
-        .frame(height: 90)
+        .frame(height: LayoutConstants.Size.hourlyScrollHeight)
     }
 }
 

@@ -11,7 +11,11 @@ struct HourlyForecastRow: View {
                 .font(.caption2)
                 .foregroundStyle(isNow ? .primary : .secondary)
 
-            WeatherIcon(condition: forecast.condition, isDaytime: forecast.isDaytime, size: 18)
+            WeatherIcon(
+                condition: forecast.condition,
+                isDaytime: forecast.isDaytime,
+                size: LayoutConstants.Size.hourlyIcon
+            )
 
             TemperatureText(measurement: forecast.temperature, unit: unit, font: .caption)
 
@@ -19,7 +23,7 @@ struct HourlyForecastRow: View {
                 .font(.caption2)
                 .foregroundStyle(.cyan)
         }
-        .frame(width: 44)
+        .frame(width: LayoutConstants.Size.hourlyColumnWidth)
     }
 }
 

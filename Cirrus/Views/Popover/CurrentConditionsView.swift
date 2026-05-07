@@ -5,20 +5,29 @@ struct CurrentConditionsView: View {
     let today: DailyForecast?
     let locationName: String
     let unit: TemperatureUnit
+    @ObservedObject var locationSearchViewModel: LocationSearchViewModel
+    var onLocationSelected: (Location) -> Void
 
     var body: some View {
         VStack(spacing: 10) {
-            Text(locationName)
-                .font(.headline)
-                .padding(.bottom, 2)
+            LocationSearchHeader(
+                locationName: locationName,
+                searchViewModel: locationSearchViewModel,
+                onLocationSelected: onLocationSelected
+            )
+            .padding(.bottom, 2)
 
             HStack(spacing: 8) {
-                WeatherIcon(condition: current.condition, isDaytime: current.isDaytime, size: 36)
+                WeatherIcon(
+                    condition: current.condition,
+                    isDaytime: current.isDaytime,
+                    size: LayoutConstants.Size.conditionIcon
+                )
 
                 TemperatureText(
                     measurement: current.temperature,
                     unit: unit,
-                    font: .system(size: 34, weight: .light)
+                    font: .system(size: LayoutConstants.Size.conditionTemperature, weight: .light)
                 )
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -33,52 +42,21 @@ struct CurrentConditionsView: View {
             }
             .padding(.bottom, 2)
 
-            detailCards
+            DetailCardsGrid(cards: [
+                WindCard(current: current),
+                HumidityCard(current: current),
+                UVIndexCard(current: current),
+                PressureCard(current: current),
+                CloudCoverCard(current: current),
+                VisibilityCard(current: current),
+                DewPointCard(current: current, unit: unit),
+                SnowDepthCard(current: current),
+                SunriseCard(today: today),
+                SunsetCard(today: today)
+            ])
         }
-        .padding(.vertical, 14)
-        .padding(.horizontal, 8)
-    }
-
-    private var allCards: [any WeatherCard] {
-        [
-            WindCard(current: current),
-            HumidityCard(current: current),
-            UVIndexCard(current: current),
-            PressureCard(current: current),
-            CloudCoverCard(current: current),
-            VisibilityCard(current: current),
-            DewPointCard(current: current, unit: unit),
-            SnowDepthCard(current: current),
-            SunriseCard(today: today),
-            SunsetCard(today: today)
-        ]
-    }
-
-    private var detailCards: some View {
-        let visible = allCards.filter(\.isRelevant)
-        let rows = stride(from: 0, to: visible.count, by: 2).map { idx in
-            (visible[idx], idx + 1 < visible.count ? visible[idx + 1] : nil)
-        }
-        return Grid(horizontalSpacing: 6, verticalSpacing: 6) {
-            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                GridRow {
-                    WeatherDetailCard(
-                        title: row.0.title,
-                        value: row.0.value,
-                        icon: row.0.icon,
-                        iconColor: row.0.iconColor
-                    )
-                    if let second = row.1 {
-                        WeatherDetailCard(
-                            title: second.title,
-                            value: second.value,
-                            icon: second.icon,
-                            iconColor: second.iconColor
-                        )
-                    }
-                }
-            }
-        }
+        .padding(.vertical, LayoutConstants.Padding.sectionVertical)
+        .padding(.horizontal, LayoutConstants.Padding.sectionHorizontal)
     }
 }
 
@@ -121,7 +99,9 @@ struct CurrentConditionsView: View {
             sunset: Calendar.current.date(bySettingHour: 21, minute: 42, second: 0, of: Date())
         ),
         locationName: "Oslo",
-        unit: .celsius
+        unit: .celsius,
+        locationSearchViewModel: LocationSearchViewModel(locationProvider: MockLocationProvider()),
+        onLocationSelected: { _ in }
     )
     .frame(width: 320)
 }

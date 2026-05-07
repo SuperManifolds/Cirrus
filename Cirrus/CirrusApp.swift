@@ -11,10 +11,13 @@ struct CirrusApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            if !isPreview, let weatherVM = weatherViewModel {
+            if !isPreview, let weatherVM = weatherViewModel,
+               let searchVM = locationSearchViewModel {
                 MenuBarView(
                     weatherViewModel: weatherVM,
-                    settingsViewModel: settingsViewModel
+                    settingsViewModel: settingsViewModel,
+                    locationSearchViewModel: searchVM,
+                    locationService: locationService
                 )
             }
         } label: {
