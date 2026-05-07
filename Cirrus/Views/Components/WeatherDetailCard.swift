@@ -23,7 +23,11 @@ struct WeatherDetailCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(8)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(.primary.opacity(0.05))
+                .stroke(.primary.opacity(0.1), lineWidth: 0.5)
+        )
     }
 }
 
