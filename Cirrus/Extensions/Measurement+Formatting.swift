@@ -13,3 +13,9 @@ extension Measurement where UnitType == UnitSpeed {
         return "\(Int(kmh.value.rounded())) km/h"
     }
 }
+
+func compassDirection(from degrees: Double) -> String {
+    let directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+    let index = Int((degrees + 22.5).truncatingRemainder(dividingBy: 360) / 45)
+    return directions[index]
+}
