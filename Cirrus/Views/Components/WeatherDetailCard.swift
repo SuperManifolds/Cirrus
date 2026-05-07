@@ -25,8 +25,18 @@ struct WeatherDetailCard: View {
         .padding(8)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(.primary.opacity(0.05))
-                .stroke(.primary.opacity(0.1), lineWidth: 0.5)
+                .fill(.primary.opacity(0.2))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [.white.opacity(0.3), .white.opacity(0.08)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 0.75
+                )
         )
     }
 }

@@ -104,7 +104,7 @@ struct MenuBarButtonStyle: ButtonStyle {
             .padding(.vertical, 6)
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(configuration.isPressed ? Color.primary.opacity(0.08) : Color.clear)
+                    .fill(.primary.opacity(configuration.isPressed ? 0.1 : 0.04))
             )
             .contentShape(RoundedRectangle(cornerRadius: 6))
     }
