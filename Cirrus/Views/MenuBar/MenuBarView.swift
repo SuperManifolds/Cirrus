@@ -36,7 +36,8 @@ struct MenuBarView: View {
                     }
                 )
 
-                if let minutely = snapshot.minutely, !minutely.isEmpty {
+                if let minutely = snapshot.minutely,
+                   minutely.contains(where: { $0.precipitationIntensity > 0 }) {
                     Divider()
                     PrecipitationChartView(minutely: minutely)
                 }
