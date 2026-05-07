@@ -4,16 +4,20 @@ struct CurrentConditionsView: View {
     let current: CurrentWeather
     let today: DailyForecast?
     let locationName: String
+    let isPinnedLocation: Bool
     let unit: TemperatureUnit
     @ObservedObject var locationSearchViewModel: LocationSearchViewModel
     var onLocationSelected: (Location) -> Void
+    var onUseCurrentLocation: () -> Void
 
     var body: some View {
         VStack(spacing: 10) {
             LocationSearchHeader(
                 locationName: locationName,
+                isPinnedLocation: isPinnedLocation,
                 searchViewModel: locationSearchViewModel,
-                onLocationSelected: onLocationSelected
+                onLocationSelected: onLocationSelected,
+                onUseCurrentLocation: onUseCurrentLocation
             )
             .padding(.bottom, 2)
 
@@ -99,9 +103,11 @@ struct CurrentConditionsView: View {
             sunset: Calendar.current.date(bySettingHour: 21, minute: 42, second: 0, of: Date())
         ),
         locationName: "Oslo",
+        isPinnedLocation: false,
         unit: .celsius,
-        locationSearchViewModel: LocationSearchViewModel(locationProvider: MockLocationProvider()),
-        onLocationSelected: { _ in }
+        locationSearchViewModel: LocationSearchViewModel.preview(),
+        onLocationSelected: { _ in },
+        onUseCurrentLocation: {}
     )
     .frame(width: 320)
 }

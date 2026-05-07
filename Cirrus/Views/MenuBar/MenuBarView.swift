@@ -18,12 +18,19 @@ struct MenuBarView: View {
                     current: snapshot.current,
                     today: snapshot.daily.first,
                     locationName: snapshot.location.name,
+                    isPinnedLocation: !settingsViewModel.useCurrentLocation,
                     unit: settingsViewModel.temperatureUnit,
                     locationSearchViewModel: locationSearchViewModel,
                     onLocationSelected: { location in
                         settingsViewModel.pinnedLocation = location
                         settingsViewModel.useCurrentLocation = false
                         locationService.currentLocation = location
+                    },
+                    onUseCurrentLocation: {
+                        settingsViewModel.useCurrentLocation = true
+                        settingsViewModel.pinnedLocation = nil
+                        locationService.requestAuthorization()
+                        locationService.requestLocation()
                     }
                 )
 
