@@ -12,10 +12,11 @@ struct WeatherKitService: WeatherProviding {
         let currentWeather: WeatherKit.CurrentWeather
         let hourlyForecast: Forecast<HourWeather>
         let dailyForecast: Forecast<DayWeather>
+        let minuteForecast: Forecast<MinuteWeather>?
         do {
-            (currentWeather, hourlyForecast, dailyForecast) = try await service.weather(
+            (currentWeather, hourlyForecast, dailyForecast, minuteForecast) = try await service.weather(
                 for: clLocation,
-                including: .current, .hourly, .daily
+                including: .current, .hourly, .daily, .minute
             )
         } catch {
             throw WeatherProviderError.networkError(underlying: error)
@@ -24,9 +25,10 @@ struct WeatherKitService: WeatherProviding {
         let current = mapCurrent(currentWeather)
         let hourly = mapHourly(hourlyForecast)
         let daily = mapDaily(dailyForecast)
+        let minutely = mapMinutely(minuteForecast)
 
         return WeatherSnapshot(
-            current: current, hourly: hourly, daily: daily,
+            current: current, hourly: hourly, daily: daily, minutely: minutely,
             location: location, fetchedAt: Date(), provider: .weatherKit
         )
     }
@@ -78,6 +80,19 @@ struct WeatherKitService: WeatherProviding {
                 windSpeedMax: day.wind.speed,
                 sunrise: day.sun.sunrise,
                 sunset: day.sun.sunset
+            )
+        }
+    }
+
+    private func mapMinutely(_ forecast: Forecast<MinuteWeather>?) -> [MinuteForecast]? {
+        guard let forecast else { return nil }
+        let minutes = Array(forecast.prefix(60))
+        guard !minutes.isEmpty else { return nil }
+        return minutes.map { minute in
+            MinuteForecast(
+                date: minute.date,
+                precipitationIntensity: minute.precipitationIntensity.value,
+                precipitationChance: minute.precipitationChance * 100
             )
         }
     }

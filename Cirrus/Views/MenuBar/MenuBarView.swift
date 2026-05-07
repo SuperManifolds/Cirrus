@@ -13,6 +13,11 @@ struct MenuBarView: View {
                     unit: settingsViewModel.temperatureUnit
                 )
 
+                if let minutely = snapshot.minutely, !minutely.isEmpty {
+                    Divider()
+                    PrecipitationChartView(minutely: minutely)
+                }
+
                 Divider()
 
                 HourlyScrollView(

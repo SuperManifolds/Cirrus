@@ -4,6 +4,7 @@ struct WeatherSnapshot: Sendable {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
     let daily: [DailyForecast]
+    let minutely: [MinuteForecast]?
     let location: Location
     let fetchedAt: Date
     let provider: WeatherProviderKind

@@ -4,9 +4,11 @@ import OSLog
 struct OpenMeteoService: WeatherProviding {
     let kind: WeatherProviderKind = .openMeteo
     private let session: URLSession
+    private let nowcastService: METNorwayNowcastService
 
     init(session: URLSession = .shared) {
         self.session = session
+        self.nowcastService = METNorwayNowcastService(session: session)
     }
 
     private static let baseURL = "https://api.open-meteo.com/v1/forecast"
@@ -28,6 +30,8 @@ struct OpenMeteoService: WeatherProviding {
         "precipitation_probability_max", "precipitation_sum",
         "uv_index_max", "wind_speed_10m_max", "sunrise", "sunset"
     ].joined(separator: ",")
+
+    private static let minutely15Params = "precipitation"
 
     func fetchWeather(for location: Location) async throws -> WeatherSnapshot {
         let url = try buildURL(for: location)
@@ -69,7 +73,12 @@ struct OpenMeteoService: WeatherProviding {
             throw WeatherProviderError.decodingError(underlying: error)
         }
 
-        return mapToSnapshot(decoded, location: location)
+        // MET Norway nowcast provides 5-min radar precipitation for Nordic countries.
+        // Falls back to Open-Meteo's interpolated minutely_15 data elsewhere.
+        let nowcast = try? await nowcastService.fetchNowcast(for: location)
+        Log.api.debug("Nowcast: \(nowcast?.count ?? -1) entries, minutely_15: \(decoded.minutely15?.time.count ?? -1) entries")
+
+        return mapToSnapshot(decoded, location: location, nowcast: nowcast)
     }
 
     private func buildURL(for location: Location) throws -> URL {
@@ -84,7 +93,9 @@ struct OpenMeteoService: WeatherProviding {
             URLQueryItem(name: "daily", value: Self.dailyParams),
             URLQueryItem(name: "timezone", value: "auto"),
             URLQueryItem(name: "forecast_days", value: "10"),
-            URLQueryItem(name: "forecast_hours", value: "24")
+            URLQueryItem(name: "forecast_hours", value: "24"),
+            URLQueryItem(name: "minutely_15", value: Self.minutely15Params),
+            URLQueryItem(name: "forecast_minutely_15", value: "4")
         ]
         guard let url = components.url else {
             throw WeatherProviderError.networkError(underlying: URLError(.badURL))
@@ -92,12 +103,17 @@ struct OpenMeteoService: WeatherProviding {
         return url
     }
 
-    private func mapToSnapshot(_ response: OpenMeteoResponse, location: Location) -> WeatherSnapshot {
+    private func mapToSnapshot(
+        _ response: OpenMeteoResponse,
+        location: Location,
+        nowcast: [MinuteForecast]?
+    ) -> WeatherSnapshot {
         let current = mapCurrent(response.current)
         let hourly = mapHourly(response.hourly)
         let daily = mapDaily(response.daily)
+        let minutely = nowcast ?? mapMinutely(response.minutely15)
         return WeatherSnapshot(
-            current: current, hourly: hourly, daily: daily,
+            current: current, hourly: hourly, daily: daily, minutely: minutely,
             location: location, fetchedAt: Date(), provider: .openMeteo
         )
     }
@@ -169,6 +185,22 @@ struct OpenMeteoService: WeatherProviding {
         return results
     }
 
+    private func mapMinutely(_ om: OpenMeteoMinutely15?) -> [MinuteForecast]? {
+        guard let om else { return nil }
+        let count = om.time.count
+        guard count > 0 else { return nil }
+        var results: [MinuteForecast] = []
+        results.reserveCapacity(count)
+        for idx in 0..<count {
+            results.append(MinuteForecast(
+                date: om.time[idx],
+                precipitationIntensity: om.precipitation[idx],
+                precipitationChance: om.precipitation[idx] > 0 ? 100 : 0
+            ))
+        }
+        return results
+    }
+
     private static func decodeOpenMeteoDate(decoder: Decoder, timeZone: TimeZone) throws -> Date {
         let container = try decoder.singleValueContainer()
         let string = try container.decode(String.self)
@@ -204,6 +236,12 @@ private struct OpenMeteoResponse: Decodable {
     let current: OpenMeteoCurrent
     let hourly: OpenMeteoHourly
     let daily: OpenMeteoDaily
+    let minutely15: OpenMeteoMinutely15?
+
+    enum CodingKeys: String, CodingKey {
+        case current, hourly, daily
+        case minutely15 = "minutely_15"
+    }
 }
 
 private struct OpenMeteoCurrent: Decodable {
@@ -285,4 +323,9 @@ private struct OpenMeteoDaily: Decodable {
         case windSpeed10mMax = "wind_speed_10m_max"
         case sunrise, sunset
     }
+}
+
+private struct OpenMeteoMinutely15: Decodable {
+    let time: [Date]
+    let precipitation: [Double]
 }

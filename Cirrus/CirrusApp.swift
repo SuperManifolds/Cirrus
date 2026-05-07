@@ -2,6 +2,8 @@ import SwiftUI
 
 @main
 struct CirrusApp: App {
+    private let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+
     @StateObject private var settingsViewModel = SettingsViewModel()
     @State private var locationService = LocationService()
     @State private var weatherViewModel: WeatherViewModel?
@@ -9,14 +11,14 @@ struct CirrusApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            if let weatherVM = weatherViewModel {
+            if !isPreview, let weatherVM = weatherViewModel {
                 MenuBarView(
                     weatherViewModel: weatherVM,
                     settingsViewModel: settingsViewModel
                 )
             }
         } label: {
-            if let weatherVM = weatherViewModel {
+            if !isPreview, let weatherVM = weatherViewModel {
                 MenuBarLabel(
                     weatherViewModel: weatherVM,
                     settingsViewModel: settingsViewModel

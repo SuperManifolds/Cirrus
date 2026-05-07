@@ -52,10 +52,12 @@ struct MockWeatherProvider: WeatherProviding {
         )
         let hourly = Self.mockHourly()
         let daily = Self.mockDaily()
+        let minutely = Self.mockMinutely()
         return WeatherSnapshot(
             current: current,
             hourly: hourly,
             daily: daily,
+            minutely: minutely,
             location: location,
             fetchedAt: Date(),
             provider: .openMeteo
@@ -99,6 +101,21 @@ struct MockWeatherProvider: WeatherProviding {
                 precipitationSum: precipSum, uvIndexMax: 6, windSpeedMax: wind,
                 sunrise: Calendar.current.date(bySettingHour: 6, minute: 30, second: 0, of: date),
                 sunset: Calendar.current.date(bySettingHour: 21, minute: 0, second: 0, of: date)
+            ))
+        }
+        return results
+    }
+
+    static func mockMinutely() -> [MinuteForecast] {
+        let now = Date()
+        var results: [MinuteForecast] = []
+        for min in stride(from: 0, to: 60, by: 15) {
+            let date = Calendar.current.date(byAdding: .minute, value: min, to: now) ?? now
+            let intensity = min >= 15 && min <= 30 ? 2.5 : 0.0
+            results.append(MinuteForecast(
+                date: date,
+                precipitationIntensity: intensity,
+                precipitationChance: intensity > 0 ? 80 : 0
             ))
         }
         return results

@@ -104,6 +104,7 @@ struct WeatherCacheServiceTests {
             ),
             hourly: [],
             daily: [],
+            minutely: nil,
             location: location,
             fetchedAt: Date(),
             provider: .openMeteo
