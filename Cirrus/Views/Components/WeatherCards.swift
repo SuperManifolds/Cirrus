@@ -6,6 +6,11 @@ protocol WeatherCard {
     var icon: String { get }
     var iconColor: Color { get }
     var isRelevant: Bool { get }
+    var directionDegrees: Double? { get }
+}
+
+extension WeatherCard {
+    var directionDegrees: Double? { nil }
 }
 
 // MARK: - Card Implementations
@@ -19,6 +24,7 @@ struct WindCard: WeatherCard {
     var value: String {
         "\(current.windSpeed.formattedWindSpeed) \(compassDirection(from: current.windDirection))"
     }
+    var directionDegrees: Double? { current.windDirection }
 }
 
 struct HumidityCard: WeatherCard {

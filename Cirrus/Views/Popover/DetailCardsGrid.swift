@@ -15,14 +15,16 @@ struct DetailCardsGrid: View {
                         title: row.0.title,
                         value: row.0.value,
                         icon: row.0.icon,
-                        iconColor: row.0.iconColor
+                        iconColor: row.0.iconColor,
+                        directionDegrees: row.0.directionDegrees
                     )
                     if let second = row.1 {
                         WeatherDetailCard(
                             title: second.title,
                             value: second.value,
                             icon: second.icon,
-                            iconColor: second.iconColor
+                            iconColor: second.iconColor,
+                            directionDegrees: second.directionDegrees
                         )
                     }
                 }

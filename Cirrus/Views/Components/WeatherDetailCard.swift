@@ -5,6 +5,7 @@ struct WeatherDetailCard: View {
     let value: String
     let icon: String
     var iconColor: Color = .secondary
+    var directionDegrees: Double?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -17,9 +18,18 @@ struct WeatherDetailCard: View {
             .font(.caption2)
             .textCase(.uppercase)
             .foregroundStyle(.secondary)
-            Text(value)
-                .font(.callout)
-                .fontWeight(.medium)
+            HStack(spacing: 4) {
+                Text(value)
+                    .font(.callout)
+                    .fontWeight(.medium)
+                if let degrees = directionDegrees {
+                    Image(systemName: "arrow.down")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(degrees))
+                }
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(LayoutConstants.Padding.card)
