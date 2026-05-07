@@ -35,6 +35,16 @@ struct MenuBarLabel: View {
                     }
             }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(menuBarAccessibilityLabel)
+    }
+
+    private var menuBarAccessibilityLabel: String {
+        guard let current = weatherViewModel.snapshot?.current else {
+            return String(localized: "Cirrus Weather")
+        }
+        let temp = current.temperature.formatted(as: settingsViewModel.temperatureUnit)
+        return "\(temp), \(current.condition.displayName)"
     }
 
     private var coloredIcon: NSImage {

@@ -5,7 +5,7 @@ struct PrecipitationChartView: View {
     @State private var hoveredIndex: Int?
 
     private var maxIntensity: Double {
-        max(minutely.map(\.precipitationIntensity).max() ?? 0, 0.5)
+        max(minutely.map(\.precipitationIntensity).max() ?? 0, LayoutConstants.Size.precipMinIntensity)
     }
 
     var body: some View {
@@ -26,6 +26,8 @@ struct PrecipitationChartView: View {
                 }
             }
             .frame(height: LayoutConstants.Size.precipBarHeight)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(summaryText)
 
             HStack {
                 if let first = minutely.first {

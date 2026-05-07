@@ -4,6 +4,7 @@ struct LocationSearchHeader: View {
     let locationName: String
     let isPinnedLocation: Bool
     @ObservedObject var searchViewModel: LocationSearchViewModel
+    @ObservedObject var settingsViewModel: SettingsViewModel
     var onLocationSelected: (Location) -> Void
     var onUseCurrentLocation: () -> Void
     @State private var isSearching = false
@@ -49,12 +50,21 @@ struct LocationSearchHeader: View {
             }
         }
         .overlay(alignment: .top) {
-            if isSearching && (!searchViewModel.results.isEmpty || isPinnedLocation || searchViewModel.isSearching) {
+            if isSearching && (hasDropdownContent || isPinnedLocation) {
                 searchResults
-                    .offset(y: 36)
+                    .offset(y: LayoutConstants.Offset.searchDropdown)
             }
         }
         .zIndex(1)
+    }
+
+    private var hasSearchQuery: Bool {
+        searchViewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
+    }
+
+    private var hasDropdownContent: Bool {
+        !searchViewModel.results.isEmpty || searchViewModel.isSearching
+            || hasSearchQuery || !settingsViewModel.favoriteLocations.isEmpty
     }
 
     private var searchResults: some View {
@@ -73,10 +83,31 @@ struct LocationSearchHeader: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+            }
 
-                if !searchViewModel.results.isEmpty {
-                    Divider()
+            if !settingsViewModel.favoriteLocations.isEmpty && !hasSearchQuery {
+                if isPinnedLocation { Divider() }
+                ForEach(settingsViewModel.favoriteLocations) { location in
+                    Button {
+                        onLocationSelected(location)
+                        isSearching = false
+                        searchViewModel.clearResults()
+                    } label: {
+                        HStack {
+                            Label(location.name, systemImage: "star.fill")
+                                .font(.callout)
+                            Spacer()
+                        }
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 6)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
                 }
+            }
+
+            if isPinnedLocation || !settingsViewModel.favoriteLocations.isEmpty {
+                if !searchViewModel.results.isEmpty || hasSearchQuery { Divider() }
             }
 
             if searchViewModel.isSearching {
@@ -87,6 +118,14 @@ struct LocationSearchHeader: View {
                     Spacer()
                 }
                 .padding(.vertical, 4)
+            }
+
+            if !searchViewModel.isSearching && searchViewModel.results.isEmpty && hasSearchQuery {
+                Text(String(localized: "No results found"))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
             }
 
             ForEach(searchViewModel.results) { location in
@@ -127,6 +166,7 @@ struct LocationSearchHeader: View {
         locationName: "Oslo",
         isPinnedLocation: false,
         searchViewModel: LocationSearchViewModel.preview(),
+        settingsViewModel: SettingsViewModel.preview(),
         onLocationSelected: { _ in },
         onUseCurrentLocation: {}
     )
@@ -139,6 +179,7 @@ struct LocationSearchHeader: View {
         locationName: "Bergen",
         isPinnedLocation: true,
         searchViewModel: LocationSearchViewModel.preview(),
+        settingsViewModel: SettingsViewModel.preview(),
         onLocationSelected: { _ in },
         onUseCurrentLocation: {}
     )

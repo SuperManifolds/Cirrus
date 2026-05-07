@@ -1,3 +1,4 @@
+import CoreLocation
 import SwiftUI
 
 struct MenuBarView: View {
@@ -23,6 +24,7 @@ struct MenuBarView: View {
                     pollen: settingsViewModel.showAirQuality ? weatherViewModel.pollen : nil,
                     unit: settingsViewModel.temperatureUnit,
                     locationSearchViewModel: locationSearchViewModel,
+                    settingsViewModel: settingsViewModel,
                     onLocationSelected: { location in
                         settingsViewModel.pinnedLocation = location
                         settingsViewModel.useCurrentLocation = false
@@ -79,37 +81,59 @@ struct MenuBarView: View {
                 Divider()
             } else {
                 VStack(spacing: 8) {
-                    Image(systemName: "location.slash.fill")
-                        .font(.title2)
-                        .foregroundStyle(.secondary)
-                    Text(String(localized: "Waiting for location..."))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    if locationService.authorizationStatus == .denied
+                        || locationService.authorizationStatus == .restricted {
+                        Image(systemName: "location.slash.fill")
+                            .font(.title2)
+                            .foregroundStyle(.red)
+                        Text(String(localized: "Location access denied"))
+                            .font(.caption)
+                            .fontWeight(.medium)
+                        Text(String(localized: "Enable in System Settings or search for a city above."))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    } else {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text(String(localized: "Getting your location..."))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 .padding(20)
                 Divider()
             }
 
-            MenuBarFooter()
+            MenuBarFooter(lastUpdated: weatherViewModel.snapshot?.fetchedAt)
         }
         .frame(width: WeatherDefaults.popoverWidth)
+        .animation(.easeInOut(duration: 0.2), value: weatherViewModel.snapshot != nil)
+        .animation(.easeInOut(duration: 0.2), value: weatherViewModel.isLoading)
     }
 }
 
 struct MenuBarButtonStyle: ButtonStyle {
+    @State private var isHovered = false
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
             .background(
                 RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.button)
-                    .fill(.primary.opacity(
-                        configuration.isPressed
-                            ? LayoutConstants.Opacity.buttonPressed
-                            : LayoutConstants.Opacity.buttonResting
-                    ))
+                    .fill(.primary.opacity(backgroundOpacity(isPressed: configuration.isPressed)))
             )
             .contentShape(RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.button))
+            .onHover { hovering in
+                isHovered = hovering
+            }
+    }
+
+    private func backgroundOpacity(isPressed: Bool) -> Double {
+        if isPressed { return LayoutConstants.Opacity.buttonPressed }
+        if isHovered { return LayoutConstants.Opacity.buttonPressed * 0.7 }
+        return LayoutConstants.Opacity.buttonResting
     }
 }
 

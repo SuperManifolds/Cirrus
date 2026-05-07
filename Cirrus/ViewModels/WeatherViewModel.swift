@@ -53,12 +53,21 @@ final class WeatherViewModel: ObservableObject {
 
         if let cached = await cache.get(for: location) {
             snapshot = cached
+            // Refresh in background if cache is older than half the max age
+            let age = Date().timeIntervalSince(cached.fetchedAt)
+            if age > WeatherDefaults.cacheMaxAge / 2 {
+                Task { await fetchFresh(for: location) }
+            }
             return
         }
 
         isLoading = true
         error = nil
+        await fetchFresh(for: location)
+        isLoading = false
+    }
 
+    private func fetchFresh(for location: Location) async {
         do {
             async let weatherFetch = weatherProvider.fetchWeather(for: location)
             async let aqFetch = airQualityProvider.fetchAirQuality(for: location)
@@ -74,8 +83,6 @@ final class WeatherViewModel: ObservableObject {
             self.error = error.localizedDescription
             Log.weather.error("Weather fetch failed: \(error.localizedDescription)")
         }
-
-        isLoading = false
     }
 
     func switchProvider(to kind: WeatherProviderKind) {

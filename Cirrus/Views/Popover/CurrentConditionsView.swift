@@ -9,6 +9,7 @@ struct CurrentConditionsView: View {
     let pollen: Pollen?
     let unit: TemperatureUnit
     @ObservedObject var locationSearchViewModel: LocationSearchViewModel
+    @ObservedObject var settingsViewModel: SettingsViewModel
     var onLocationSelected: (Location) -> Void
     var onUseCurrentLocation: () -> Void
 
@@ -18,6 +19,7 @@ struct CurrentConditionsView: View {
                 locationName: locationName,
                 isPinnedLocation: isPinnedLocation,
                 searchViewModel: locationSearchViewModel,
+                settingsViewModel: settingsViewModel,
                 onLocationSelected: onLocationSelected,
                 onUseCurrentLocation: onUseCurrentLocation
             )
@@ -126,6 +128,7 @@ struct CurrentConditionsView: View {
         ),
         unit: .celsius,
         locationSearchViewModel: LocationSearchViewModel.preview(),
+        settingsViewModel: SettingsViewModel.preview(),
         onLocationSelected: { _ in },
         onUseCurrentLocation: {}
     )

@@ -2,34 +2,74 @@ import SwiftUI
 
 struct WeatherAlertBanner: View {
     let alerts: [WeatherAlert]
+    @State private var expandedAlertID: String?
 
     var body: some View {
         VStack(spacing: 4) {
             ForEach(alerts) { alert in
-                HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(color(for: alert.severity))
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(color(for: alert.severity))
 
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(alert.event)
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                        Text(alert.headline)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(alert.event)
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                            Text(alert.headline)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(expandedAlertID == alert.id ? nil : 2)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: expandedAlertID == alert.id ? "chevron.up" : "chevron.down")
                             .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(LayoutConstants.Padding.card)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            expandedAlertID = expandedAlertID == alert.id ? nil : alert.id
+                        }
                     }
 
-                    Spacer()
+                    if expandedAlertID == alert.id {
+                        VStack(alignment: .leading, spacing: 4) {
+                            if !alert.description.isEmpty {
+                                Text(alert.description)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            HStack(spacing: 12) {
+                                if let endDate = alert.endDate {
+                                    Label(
+                                        String(localized: "Until \(endDate.formatted(date: .abbreviated, time: .shortened))"),
+                                        systemImage: "clock"
+                                    )
+                                }
+                                if let source = alert.source {
+                                    Label(source, systemImage: "building.2")
+                                }
+                            }
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                        }
+                        .padding(.horizontal, LayoutConstants.Padding.card)
+                        .padding(.bottom, LayoutConstants.Padding.card)
+                        .transition(.opacity)
+                    }
                 }
-                .padding(LayoutConstants.Padding.card)
                 .background(
                     color(for: alert.severity).opacity(0.1),
                     in: RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)
                 )
             }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, LayoutConstants.Padding.sectionHorizontal)
         .padding(.vertical, 4)
     }
 
@@ -52,7 +92,7 @@ struct WeatherAlertBanner: View {
             event: "Storm Warning",
             severity: .severe,
             headline: "Strong winds expected in coastal areas",
-            description: "",
+            description: "Winds up to 90 km/h expected along the coast from midnight.",
             startDate: Date(),
             endDate: Date().addingTimeInterval(3600 * 6),
             source: "MET Norway"

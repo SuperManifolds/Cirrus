@@ -5,22 +5,50 @@ struct WeatherIcon: View {
     let isDaytime: Bool
     var size: CGFloat = 24
 
+    private static let moonColor = Color(red: 0.85, green: 0.8, blue: 0.55)
+
     var body: some View {
         Image(systemName: condition.symbol(isDaytime: isDaytime))
-            .symbolRenderingMode(.multicolor)
-            .foregroundStyle(tintColor)
+            .symbolRenderingMode(renderingMode)
+            .foregroundStyle(primaryColor, secondaryColor)
             .font(.system(size: size))
+            .accessibilityLabel(condition.displayName)
     }
 
-    private var tintColor: Color {
-        switch condition {
-            case .clear, .mainlyClear: .yellow
-            case .partlyCloudy: .blue
-            case .cloudy, .fog: .gray
-            case .rain, .heavyRain, .showers, .heavyShowers, .drizzle: .cyan
-            case .snow, .heavySnow, .snowShowers, .sleet, .freezingDrizzle, .freezingRain: .blue
-            case .thunderstorm, .thunderstormWithHail: .orange
+    private var renderingMode: SymbolRenderingMode {
+        if !isDaytime, condition == .clear || condition == .mainlyClear || condition == .partlyCloudy {
+            return .palette
         }
+        return .multicolor
+    }
+
+    private var primaryColor: Color {
+        if !isDaytime {
+            switch condition {
+                case .clear, .mainlyClear: return Self.moonColor
+                case .partlyCloudy: return .gray
+                default: break
+            }
+        }
+        switch condition {
+            case .clear, .mainlyClear: return .yellow
+            case .partlyCloudy: return .blue
+            case .cloudy, .fog: return .gray
+            case .rain, .heavyRain, .showers, .heavyShowers, .drizzle: return .cyan
+            case .snow, .heavySnow, .snowShowers, .sleet, .freezingDrizzle, .freezingRain: return .blue
+            case .thunderstorm, .thunderstormWithHail: return .orange
+        }
+    }
+
+    private var secondaryColor: Color {
+        if !isDaytime {
+            switch condition {
+                case .clear, .mainlyClear: return Self.moonColor.opacity(0.6)
+                case .partlyCloudy: return Self.moonColor
+                default: break
+            }
+        }
+        return primaryColor.opacity(0.6)
     }
 }
 

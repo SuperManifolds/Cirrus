@@ -41,6 +41,8 @@ struct WeatherDetailCard: View {
                     lineWidth: LayoutConstants.Opacity.cardBorderWidth
                 )
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 }
 

@@ -36,6 +36,14 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
+    @Published var favoriteLocations: [Location] {
+        didSet {
+            if let data = try? JSONEncoder().encode(favoriteLocations) {
+                UserDefaults.standard.set(data, forKey: Keys.favoriteLocations)
+            }
+        }
+    }
+
     @Published var coloredMenuBarIcon: Bool {
         didSet { UserDefaults.standard.set(coloredMenuBarIcon, forKey: Keys.coloredMenuBarIcon) }
     }
@@ -77,6 +85,12 @@ final class SettingsViewModel: ObservableObject {
             pinnedLocation = nil
         }
 
+        if let data = defaults.data(forKey: Keys.favoriteLocations) {
+            favoriteLocations = (try? JSONDecoder().decode([Location].self, from: data)) ?? []
+        } else {
+            favoriteLocations = []
+        }
+
         coloredMenuBarIcon = defaults.bool(forKey: Keys.coloredMenuBarIcon)
 
         showAirQuality = defaults.object(forKey: Keys.showAirQuality) == nil
@@ -98,6 +112,26 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
+    static let maxFavorites = 5
+
+    func addFavorite(_ location: Location) {
+        guard !favoriteLocations.contains(where: { $0.id == location.id }) else { return }
+        var updated = favoriteLocations
+        if updated.count >= Self.maxFavorites {
+            updated.removeLast()
+        }
+        updated.append(location)
+        favoriteLocations = updated
+    }
+
+    func removeFavorite(_ location: Location) {
+        favoriteLocations.removeAll { $0.id == location.id }
+    }
+
+    func isFavorite(_ location: Location) -> Bool {
+        favoriteLocations.contains { $0.id == location.id }
+    }
+
     private enum Keys {
         static let temperatureUnit = "temperatureUnit"
         static let weatherProvider = "weatherProvider"
@@ -107,6 +141,7 @@ final class SettingsViewModel: ObservableObject {
         static let pinnedLocation = "pinnedLocation"
         static let coloredMenuBarIcon = "coloredMenuBarIcon"
         static let showAirQuality = "showAirQuality"
+        static let favoriteLocations = "favoriteLocations"
     }
 
     #if DEBUG

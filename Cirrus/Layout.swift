@@ -19,6 +19,10 @@ enum LayoutConstants {
         static let sectionHorizontal: CGFloat = 8
     }
 
+    enum Offset {
+        static let searchDropdown: CGFloat = 36
+    }
+
     enum Size {
         static let conditionIcon: CGFloat = 36
         static let conditionTemperature: CGFloat = 34
@@ -32,6 +36,7 @@ enum LayoutConstants {
         static let precipBarHeight: CGFloat = 30
         static let precipBarMinHeight: CGFloat = 2
         static let precipBarCornerRadius: CGFloat = 1.5
+        static let precipMinIntensity: Double = 0.5
         static let settingsWidth: CGFloat = 420
         static let settingsHeight: CGFloat = 320
     }
