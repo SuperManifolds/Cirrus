@@ -56,6 +56,10 @@ final class SettingsViewModel: ObservableObject {
         didSet { UserDefaults.standard.set(showAISummary, forKey: Keys.showAISummary) }
     }
 
+    @Published var showNotifications: Bool {
+        didSet { UserDefaults.standard.set(showNotifications, forKey: Keys.showNotifications) }
+    }
+
     @Published var launchAtLogin: Bool {
         didSet { updateLaunchAtLogin() }
     }
@@ -105,6 +109,10 @@ final class SettingsViewModel: ObservableObject {
             ? true
             : defaults.bool(forKey: Keys.showAISummary)
 
+        showNotifications = defaults.object(forKey: Keys.showNotifications) == nil
+            ? true
+            : defaults.bool(forKey: Keys.showNotifications)
+
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 
@@ -151,6 +159,7 @@ final class SettingsViewModel: ObservableObject {
         static let showAirQuality = "showAirQuality"
         static let favoriteLocations = "favoriteLocations"
         static let showAISummary = "showAISummary"
+        static let showNotifications = "showNotifications"
     }
 
     #if DEBUG
@@ -165,6 +174,7 @@ final class SettingsViewModel: ObservableObject {
 enum MenuBarDisplayMode: String, CaseIterable, Identifiable, Sendable {
     case iconOnly = "icon_only"
     case iconAndTemperature = "icon_and_temperature"
+    case iconAndFeelsLike = "icon_and_feels_like"
     case iconTemperatureAndCondition = "icon_temperature_and_condition"
 
     var id: String { rawValue }
@@ -173,6 +183,7 @@ enum MenuBarDisplayMode: String, CaseIterable, Identifiable, Sendable {
         switch self {
             case .iconOnly: String(localized: "Icon Only")
             case .iconAndTemperature: String(localized: "Icon & Temperature")
+            case .iconAndFeelsLike: String(localized: "Icon & Feels Like")
             case .iconTemperatureAndCondition: String(localized: "Icon, Temperature & Condition")
         }
     }

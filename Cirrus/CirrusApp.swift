@@ -50,6 +50,9 @@ struct CirrusApp: App {
         .onChange(of: settingsViewModel.temperatureUnit) { _, unit in
             weatherViewModel?.temperatureUnit = unit
         }
+        .onChange(of: settingsViewModel.showNotifications) { _, enabled in
+            weatherViewModel?.enableNotifications = enabled
+        }
 
         Settings {
             if let searchVM = locationSearchViewModel {
@@ -75,6 +78,7 @@ struct CirrusApp: App {
             locationProvider: locService
         )
         weatherVM.enableAISummary = settings.showAISummary
+        weatherVM.enableNotifications = settings.showNotifications
         weatherVM.temperatureUnit = settings.temperatureUnit
         _weatherViewModel = State(wrappedValue: weatherVM)
         _locationSearchViewModel = State(wrappedValue: LocationSearchViewModel(locationProvider: locService))

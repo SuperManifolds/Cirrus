@@ -10,6 +10,7 @@ final class WeatherViewModel: ObservableObject {
     @Published private(set) var summary: String?
     @Published private(set) var isLoading = false
     var enableAISummary = true
+    var enableNotifications = true
     var temperatureUnit: TemperatureUnit = .celsius
     @Published private(set) var error: String?
 
@@ -18,7 +19,10 @@ final class WeatherViewModel: ObservableObject {
     private let airQualityProvider: any AirQualityProviding
     private let pollenProvider: any PollenProviding
     private let summaryService = WeatherSummaryService()
+    private let notificationService = NotificationService()
     private let cache: WeatherCacheService
+    private var previousAlertIDs: Set<String> = []
+    private var previousHadRain = false
     private var refreshTask: Task<Void, Never>?
     private var cancellables = Set<AnyCancellable>()
 
@@ -95,9 +99,52 @@ final class WeatherViewModel: ObservableObject {
             } else {
                 summary = nil
             }
+
+            if enableNotifications {
+                checkNotifications(result: result, pollen: pollen)
+            }
         } catch {
             self.error = error.localizedDescription
             Log.weather.error("Weather fetch failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func checkNotifications(result: WeatherSnapshot, pollen: Pollen?) {
+        // New weather alerts
+        let currentAlertIDs = Set(result.alerts.map(\.id))
+        let newAlertIDs = currentAlertIDs.subtracting(previousAlertIDs)
+        for alert in result.alerts where newAlertIDs.contains(alert.id) {
+            notificationService.postWeatherAlert(alert)
+        }
+        previousAlertIDs = currentAlertIDs
+
+        // Rain warning
+        let hasRain = result.minutely?.contains { $0.precipitationIntensity > 0 } ?? false
+        if hasRain && !previousHadRain {
+            if let minutely = result.minutely,
+               let firstRain = minutely.first(where: { $0.precipitationIntensity > 0 }) {
+                let time = firstRain.date.formatted(date: .omitted, time: .shortened)
+                notificationService.postRainWarning(
+                    summary: String(localized: "Rain expected around \(time)")
+                )
+            }
+        }
+        previousHadRain = hasRain
+
+        // Pollen alerts
+        if let pollen {
+            let types: [(String, Double?)] = [
+                (String(localized: "Birch"), pollen.birch),
+                (String(localized: "Grass"), pollen.grass),
+                (String(localized: "Alder"), pollen.alder)
+            ]
+            for (name, value) in types {
+                guard let amount = value else { continue }
+                let level = PollenLevel(grainsPerM3: amount)
+                if level == .high || level == .veryHigh {
+                    notificationService.postPollenAlert(type: name, level: level)
+                }
+            }
         }
     }
 

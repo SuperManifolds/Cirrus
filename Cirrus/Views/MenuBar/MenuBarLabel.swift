@@ -28,6 +28,10 @@ struct MenuBarLabel: View {
                     if let temp = weatherViewModel.snapshot?.current.temperature {
                         Text(temp.formatted(as: settingsViewModel.temperatureUnit))
                     }
+                case .iconAndFeelsLike:
+                    if let apparent = weatherViewModel.snapshot?.current.apparentTemperature {
+                        Text(apparent.formatted(as: settingsViewModel.temperatureUnit))
+                    }
                 case .iconTemperatureAndCondition:
                     if let current = weatherViewModel.snapshot?.current {
                         let temp = current.temperature.formatted(as: settingsViewModel.temperatureUnit)

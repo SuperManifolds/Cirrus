@@ -75,18 +75,21 @@ struct PrecipitationChartView: View {
     }
 
     private var summaryText: String {
-        guard minutely.contains(where: { $0.precipitationIntensity > 0 }) else {
+        guard let firstRainIndex = minutely.firstIndex(where: { $0.precipitationIntensity > 0 }) else {
             return String(localized: "No precipitation expected")
         }
 
-        let isRainingNow = minutely.first?.precipitationIntensity ?? 0 > 0
+        let isRainingNow = firstRainIndex == minutely.startIndex
         if isRainingNow {
-            if minutely.contains(where: { $0.precipitationIntensity == 0 }) {
-                return String(localized: "Precipitation expected to ease")
+            if let stopIndex = minutely[firstRainIndex...].firstIndex(where: { $0.precipitationIntensity == 0 }) {
+                let stopTime = minutely[stopIndex].date.formatted(date: .omitted, time: .shortened)
+                return String(localized: "Rain until around \(stopTime)")
             }
-            return String(localized: "Precipitation continuing")
+            let lastTime = minutely.last?.date.formatted(date: .omitted, time: .shortened) ?? ""
+            return String(localized: "Rain continuing past \(lastTime)")
         } else {
-            return String(localized: "Precipitation expected soon")
+            let startTime = minutely[firstRainIndex].date.formatted(date: .omitted, time: .shortened)
+            return String(localized: "Rain expected around \(startTime)")
         }
     }
 }

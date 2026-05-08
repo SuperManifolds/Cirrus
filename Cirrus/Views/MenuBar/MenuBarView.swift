@@ -61,8 +61,29 @@ struct MenuBarView: View {
 
                 Divider()
             } else if weatherViewModel.isLoading {
-                ProgressView()
-                    .padding(40)
+                VStack(spacing: LayoutConstants.Spacing.sectionGap) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .frame(width: 80, height: 16)
+                    HStack(spacing: 8) {
+                        Circle()
+                            .frame(width: LayoutConstants.Size.conditionIcon,
+                                   height: LayoutConstants.Size.conditionIcon)
+                        RoundedRectangle(cornerRadius: 4)
+                            .frame(width: 50, height: LayoutConstants.Size.conditionTemperature)
+                    }
+                    Grid(horizontalSpacing: LayoutConstants.Spacing.cardGrid,
+                         verticalSpacing: LayoutConstants.Spacing.cardGrid) {
+                        GridRow {
+                            RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)
+                                .frame(height: 44)
+                            RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)
+                                .frame(height: 44)
+                        }
+                    }
+                    .padding(.horizontal, LayoutConstants.Padding.sectionHorizontal)
+                }
+                .redacted(reason: .placeholder)
+                .padding(.vertical, LayoutConstants.Padding.sectionVertical)
             } else if let error = weatherViewModel.error {
                 VStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")

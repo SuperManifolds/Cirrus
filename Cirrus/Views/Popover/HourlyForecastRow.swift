@@ -6,7 +6,7 @@ struct HourlyForecastRow: View {
     let isNow: Bool
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 4) {
             Text(isNow ? String(localized: "Now") : forecast.date.formatted(.dateTime.hour()))
                 .font(.caption2)
                 .foregroundStyle(isNow ? .primary : .secondary)
@@ -22,8 +22,34 @@ struct HourlyForecastRow: View {
             Text(forecast.precipitationProbability > 0 ? "\(Int(forecast.precipitationProbability))%" : "")
                 .font(.caption2)
                 .foregroundStyle(.cyan)
+
+            precipBar
         }
         .frame(width: LayoutConstants.Size.hourlyColumnWidth)
+        .padding(.vertical, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 4)
+                .fill(conditionTint)
+        )
+    }
+
+    private var precipBar: some View {
+        let mm = forecast.precipitation.converted(to: .millimeters).value
+        let height = min(mm / 2.0, 1.0) * 8.0
+        return RoundedRectangle(cornerRadius: 1)
+            .fill(mm > 0 ? Color.cyan : Color.clear)
+            .frame(width: 16, height: max(height, 0))
+    }
+
+    private var conditionTint: Color {
+        switch forecast.condition {
+            case .rain, .heavyRain, .showers, .heavyShowers, .drizzle:
+                return .cyan.opacity(0.08)
+            case .snow, .heavySnow, .snowShowers, .sleet, .freezingDrizzle, .freezingRain:
+                return .blue.opacity(0.06)
+            default:
+                return .clear
+        }
     }
 }
 

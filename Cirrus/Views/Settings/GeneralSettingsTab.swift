@@ -32,6 +32,8 @@ struct GeneralSettingsTab: View {
                 Toggle(String(localized: "AI Weather Summary"), isOn: $settingsViewModel.showAISummary)
             }
 
+            Toggle(String(localized: "Notifications"), isOn: $settingsViewModel.showNotifications)
+
             Toggle(String(localized: "Launch at Login"), isOn: $settingsViewModel.launchAtLogin)
         }
         .formStyle(.grouped)
