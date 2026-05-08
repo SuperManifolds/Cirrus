@@ -19,7 +19,8 @@ struct DetailCardsGrid: View {
                         directionDegrees: row.0.directionDegrees,
                         trendValues: row.0.trendValues,
                         trendColor: row.0.trendColor,
-                        customVisual: row.0.customVisual
+                        customVisual: row.0.customVisual,
+                        visualPlacement: row.0.visualPlacement
                     )
                     if let second = row.1 {
                         WeatherDetailCard(
@@ -30,7 +31,8 @@ struct DetailCardsGrid: View {
                             directionDegrees: second.directionDegrees,
                             trendValues: second.trendValues,
                             trendColor: second.trendColor,
-                            customVisual: second.customVisual
+                            customVisual: second.customVisual,
+                            visualPlacement: second.visualPlacement
                         )
                     }
                 }

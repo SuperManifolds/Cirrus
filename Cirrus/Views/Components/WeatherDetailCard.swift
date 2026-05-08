@@ -9,6 +9,7 @@ struct WeatherDetailCard: View {
     var trendValues: [Double]?
     var trendColor: Color?
     var customVisual: AnyView?
+    var visualPlacement: CardVisualPlacement = .inline
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -33,15 +34,18 @@ struct WeatherDetailCard: View {
                         .rotationEffect(.degrees(degrees))
                 }
                 Spacer()
-                if let visual = customVisual {
+                if let visual = customVisual, visualPlacement == .inline {
                     visual
-                } else if let values = trendValues, values.count >= 2 {
+                } else if customVisual == nil, let values = trendValues, values.count >= 2 {
                     SparklineView(values: values, color: trendColor ?? iconColor)
                         .frame(width: 40, height: 16)
                 }
             }
+            if let visual = customVisual, visualPlacement == .fullWidth {
+                visual
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(LayoutConstants.Padding.card)
         .background(
             RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)

@@ -1,5 +1,10 @@
 import SwiftUI
 
+enum CardVisualPlacement {
+    case inline
+    case fullWidth
+}
+
 protocol WeatherCard {
     var title: String { get }
     var value: String { get }
@@ -10,6 +15,7 @@ protocol WeatherCard {
     var trendValues: [Double]? { get }
     var trendColor: Color? { get }
     var customVisual: AnyView? { get }
+    var visualPlacement: CardVisualPlacement { get }
 }
 
 extension WeatherCard {
@@ -17,6 +23,7 @@ extension WeatherCard {
     var trendValues: [Double]? { nil }
     var trendColor: Color? { nil }
     var customVisual: AnyView? { nil }
+    var visualPlacement: CardVisualPlacement { .inline }
 }
 
 // MARK: - Card Implementations
@@ -61,12 +68,24 @@ struct UVIndexCard: WeatherCard {
     var icon: String { "sun.max.fill" }
     var iconColor: Color { .orange }
     var isRelevant: Bool { current.isDaytime && current.uvIndex >= 3 }
-    var value: String { "\(Int(current.uvIndex))" }
-    var trendValues: [Double]? {
-        let values = hourly.prefix(8).compactMap(\.uvIndex)
-        return values.count >= 2 ? values : nil
+    var value: String { "\(Int(current.uvIndex)) · \(uvDescription)" }
+    var customVisual: AnyView? {
+        AnyView(
+            UVSeverityBar(uvIndex: current.uvIndex)
+                .frame(height: 4)
+        )
     }
-    var trendColor: Color? { .orange }
+    var visualPlacement: CardVisualPlacement { .fullWidth }
+
+    private var uvDescription: String {
+        switch Int(current.uvIndex) {
+            case 0...2: return String(localized: "Low")
+            case 3...5: return String(localized: "Moderate")
+            case 6...7: return String(localized: "High")
+            case 8...10: return String(localized: "Very High")
+            default: return String(localized: "Extreme")
+        }
+    }
 }
 
 struct PressureCard: WeatherCard {
