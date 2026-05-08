@@ -9,6 +9,11 @@ struct HourlyForecast: Sendable, Codable, Identifiable {
     let precipitation: Measurement<UnitLength>
     let humidity: Double
     let windSpeed: Measurement<UnitSpeed>
+    let cloudCover: Double?
+    let visibility: Measurement<UnitLength>?
+    let dewPoint: Measurement<UnitTemperature>?
+    let pressure: Measurement<UnitPressure>?
+    let uvIndex: Double?
     let isDaytime: Bool
 
     var id: Date { date }

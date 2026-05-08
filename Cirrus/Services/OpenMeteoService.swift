@@ -23,7 +23,8 @@ struct OpenMeteoService: WeatherProviding {
     private static let hourlyParams = [
         "temperature_2m", "relative_humidity_2m", "apparent_temperature",
         "weather_code", "precipitation_probability", "precipitation",
-        "wind_speed_10m", "is_day"
+        "wind_speed_10m", "cloud_cover", "visibility", "dew_point_2m",
+        "pressure_msl", "uv_index", "is_day"
     ].joined(separator: ",")
 
     private static let dailyParams = [
@@ -153,6 +154,9 @@ struct OpenMeteoService: WeatherProviding {
             let apparent: Measurement<UnitTemperature> = Measurement(value: om.apparentTemperature[idx], unit: .celsius)
             let wind: Measurement<UnitSpeed> = Measurement(value: om.windSpeed10m[idx], unit: .kilometersPerHour)
             let precip: Measurement<UnitLength> = Measurement(value: om.precipitation[idx], unit: .millimeters)
+            let dp: Measurement<UnitTemperature> = Measurement(value: om.dewPoint2m[idx], unit: .celsius)
+            let pres: Measurement<UnitPressure> = Measurement(value: om.pressureMsl[idx], unit: .hectopascals)
+            let vis: Measurement<UnitLength> = Measurement(value: om.visibility[idx], unit: .meters)
             results.append(HourlyForecast(
                 date: om.time[idx],
                 temperature: temp,
@@ -162,6 +166,11 @@ struct OpenMeteoService: WeatherProviding {
                 precipitation: precip,
                 humidity: om.relativeHumidity2m[idx],
                 windSpeed: wind,
+                cloudCover: om.cloudCover[idx],
+                visibility: vis,
+                dewPoint: dp,
+                pressure: pres,
+                uvIndex: om.uvIndex[idx],
                 isDaytime: om.isDay[idx] == 1
             ))
         }
@@ -306,6 +315,11 @@ private struct OpenMeteoHourly: Decodable {
     let precipitationProbability: [Double]
     let precipitation: [Double]
     let windSpeed10m: [Double]
+    let cloudCover: [Double]
+    let visibility: [Double]
+    let dewPoint2m: [Double]
+    let pressureMsl: [Double]
+    let uvIndex: [Double]
     let isDay: [Int]
 
     enum CodingKeys: String, CodingKey {
@@ -317,6 +331,11 @@ private struct OpenMeteoHourly: Decodable {
         case precipitationProbability = "precipitation_probability"
         case precipitation
         case windSpeed10m = "wind_speed_10m"
+        case cloudCover = "cloud_cover"
+        case visibility
+        case dewPoint2m = "dew_point_2m"
+        case pressureMsl = "pressure_msl"
+        case uvIndex = "uv_index"
         case isDay = "is_day"
     }
 }

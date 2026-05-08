@@ -6,6 +6,9 @@ struct WeatherDetailCard: View {
     let icon: String
     var iconColor: Color = .secondary
     var directionDegrees: Double?
+    var trendValues: [Double]?
+    var trendColor: Color?
+    var customVisual: AnyView?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -28,6 +31,13 @@ struct WeatherDetailCard: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(.secondary)
                         .rotationEffect(.degrees(degrees))
+                }
+                Spacer()
+                if let visual = customVisual {
+                    visual
+                } else if let values = trendValues, values.count >= 2 {
+                    SparklineView(values: values, color: trendColor ?? iconColor)
+                        .frame(width: 40, height: 16)
                 }
             }
         }

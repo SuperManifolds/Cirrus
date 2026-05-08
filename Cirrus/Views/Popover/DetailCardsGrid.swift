@@ -16,7 +16,10 @@ struct DetailCardsGrid: View {
                         value: row.0.value,
                         icon: row.0.icon,
                         iconColor: row.0.iconColor,
-                        directionDegrees: row.0.directionDegrees
+                        directionDegrees: row.0.directionDegrees,
+                        trendValues: row.0.trendValues,
+                        trendColor: row.0.trendColor,
+                        customVisual: row.0.customVisual
                     )
                     if let second = row.1 {
                         WeatherDetailCard(
@@ -24,7 +27,10 @@ struct DetailCardsGrid: View {
                             value: second.value,
                             icon: second.icon,
                             iconColor: second.iconColor,
-                            directionDegrees: second.directionDegrees
+                            directionDegrees: second.directionDegrees,
+                            trendValues: second.trendValues,
+                            trendColor: second.trendColor,
+                            customVisual: second.customVisual
                         )
                     }
                 }
@@ -53,13 +59,14 @@ struct DetailCardsGrid: View {
         isDaytime: true,
         timestamp: Date()
     )
+    let hourly = MockWeatherProvider.mockHourly()
     DetailCardsGrid(cards: [
-        WindCard(current: current),
-        HumidityCard(current: current),
-        UVIndexCard(current: current),
-        PressureCard(current: current),
-        CloudCoverCard(current: current),
-        VisibilityCard(current: current)
+        WindCard(current: current, hourly: hourly),
+        HumidityCard(current: current, hourly: hourly),
+        UVIndexCard(current: current, hourly: hourly),
+        PressureCard(current: current, hourly: hourly),
+        CloudCoverCard(current: current, hourly: hourly),
+        VisibilityCard(current: current, hourly: hourly)
     ])
     .frame(width: 320)
     .padding()

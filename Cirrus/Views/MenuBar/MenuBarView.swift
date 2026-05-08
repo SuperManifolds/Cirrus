@@ -17,6 +17,7 @@ struct MenuBarView: View {
 
                 CurrentConditionsView(
                     current: snapshot.current,
+                    hourly: snapshot.hourly,
                     today: snapshot.daily.first,
                     locationName: snapshot.location.name,
                     isPinnedLocation: !settingsViewModel.useCurrentLocation,

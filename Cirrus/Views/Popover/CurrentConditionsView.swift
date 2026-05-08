@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CurrentConditionsView: View {
     let current: CurrentWeather
+    let hourly: [HourlyForecast]
     let today: DailyForecast?
     let locationName: String
     let isPinnedLocation: Bool
@@ -61,13 +62,13 @@ struct CurrentConditionsView: View {
             }
 
             DetailCardsGrid(cards: [
-                WindCard(current: current),
-                HumidityCard(current: current),
-                UVIndexCard(current: current),
-                PressureCard(current: current),
-                CloudCoverCard(current: current),
-                VisibilityCard(current: current),
-                DewPointCard(current: current, unit: unit),
+                WindCard(current: current, hourly: hourly),
+                HumidityCard(current: current, hourly: hourly),
+                UVIndexCard(current: current, hourly: hourly),
+                PressureCard(current: current, hourly: hourly),
+                CloudCoverCard(current: current, hourly: hourly),
+                VisibilityCard(current: current, hourly: hourly),
+                DewPointCard(current: current, hourly: hourly, unit: unit),
                 SnowDepthCard(current: current),
                 AQICard(airQuality: airQuality),
                 PM25Card(airQuality: airQuality),
@@ -91,6 +92,7 @@ struct CurrentConditionsView: View {
 #Preview {
     CurrentConditionsView(
         current: CurrentWeather(
+
             temperature: Measurement(value: 22, unit: .celsius),
             apparentTemperature: Measurement(value: 20, unit: .celsius),
             dewPoint: Measurement(value: 12, unit: .celsius),
@@ -110,6 +112,7 @@ struct CurrentConditionsView: View {
             isDaytime: true,
             timestamp: Date()
         ),
+        hourly: MockWeatherProvider.mockHourly(),
         today: DailyForecast(
             date: Date(),
             highTemperature: Measurement(value: 24, unit: .celsius),

@@ -66,6 +66,8 @@ struct HourlyForecastRow: View {
                 precipitation: Measurement(value: 0.5, unit: .millimeters),
                 humidity: 55,
                 windSpeed: Measurement(value: 10, unit: .kilometersPerHour),
+                cloudCover: 40, visibility: nil, dewPoint: nil,
+                pressure: nil, uvIndex: 3,
                 isDaytime: true
             ),
             unit: .celsius,
@@ -81,6 +83,8 @@ struct HourlyForecastRow: View {
                 precipitation: Measurement(value: 2, unit: .millimeters),
                 humidity: 70,
                 windSpeed: Measurement(value: 15, unit: .kilometersPerHour),
+                cloudCover: 90, visibility: nil, dewPoint: nil,
+                pressure: nil, uvIndex: 1,
                 isDaytime: true
             ),
             unit: .celsius,

@@ -70,6 +70,11 @@ struct WeatherKitService: WeatherProviding {
                 precipitation: hour.precipitationAmount,
                 humidity: hour.humidity * 100,
                 windSpeed: hour.wind.speed,
+                cloudCover: hour.cloudCover * 100,
+                visibility: hour.visibility,
+                dewPoint: hour.dewPoint,
+                pressure: hour.pressure,
+                uvIndex: Double(hour.uvIndex.value),
                 isDaytime: hour.isDaylight
             )
         }

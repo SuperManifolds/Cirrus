@@ -80,11 +80,17 @@ struct MockWeatherProvider: WeatherProviding {
             let condition: WeatherCondition = hour < 6 || hour > 20 ? .clear : .partlyCloudy
             let wind: Measurement<UnitSpeed> = Measurement(value: 10, unit: .kilometersPerHour)
             let precip: Measurement<UnitLength> = Measurement(value: 0, unit: .millimeters)
+            let dp: Measurement<UnitTemperature> = Measurement(value: 10 + Double(hour % 5), unit: .celsius)
+            let pres: Measurement<UnitPressure> = Measurement(value: 1013 + Double(hour % 3), unit: .hectopascals)
+            let vis: Measurement<UnitLength> = Measurement(value: 10000, unit: .meters)
             results.append(HourlyForecast(
                 date: date, temperature: temp, apparentTemperature: apparent,
                 condition: condition, precipitationProbability: Double(hour % 4) * 10,
                 precipitation: precip, humidity: 50 + Double(hour % 10),
-                windSpeed: wind, isDaytime: hour >= 6 && hour <= 20
+                windSpeed: wind, cloudCover: Double(30 + hour % 40),
+                visibility: vis, dewPoint: dp, pressure: pres,
+                uvIndex: hour >= 6 && hour <= 20 ? Double(hour % 6) : 0,
+                isDaytime: hour >= 6 && hour <= 20
             ))
         }
         return results

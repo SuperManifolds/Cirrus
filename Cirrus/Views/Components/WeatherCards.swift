@@ -7,16 +7,23 @@ protocol WeatherCard {
     var iconColor: Color { get }
     var isRelevant: Bool { get }
     var directionDegrees: Double? { get }
+    var trendValues: [Double]? { get }
+    var trendColor: Color? { get }
+    var customVisual: AnyView? { get }
 }
 
 extension WeatherCard {
     var directionDegrees: Double? { nil }
+    var trendValues: [Double]? { nil }
+    var trendColor: Color? { nil }
+    var customVisual: AnyView? { nil }
 }
 
 // MARK: - Card Implementations
 
 struct WindCard: WeatherCard {
     let current: CurrentWeather
+    let hourly: [HourlyForecast]
     var title: String { String(localized: "Wind") }
     var icon: String { "wind" }
     var iconColor: Color { .teal }
@@ -25,28 +32,46 @@ struct WindCard: WeatherCard {
         "\(current.windSpeed.formattedWindSpeed) \(compassDirection(from: current.windDirection))"
     }
     var directionDegrees: Double? { current.windDirection }
+    var trendValues: [Double]? {
+        let values = hourly.prefix(8).map { $0.windSpeed.converted(to: .kilometersPerHour).value }
+        return values.count >= 2 ? values : nil
+    }
+    var trendColor: Color? { .teal }
 }
 
 struct HumidityCard: WeatherCard {
     let current: CurrentWeather
+    let hourly: [HourlyForecast]
     var title: String { String(localized: "Humidity") }
     var icon: String { "humidity.fill" }
     var iconColor: Color { .cyan }
     var isRelevant: Bool { current.humidity < 30 || current.humidity > 70 }
     var value: String { "\(Int(current.humidity))%" }
+    var trendValues: [Double]? {
+        let values = hourly.prefix(8).map(\.humidity)
+        return values.count >= 2 ? values : nil
+    }
+    var trendColor: Color? { .cyan }
 }
 
 struct UVIndexCard: WeatherCard {
     let current: CurrentWeather
+    let hourly: [HourlyForecast]
     var title: String { String(localized: "UV Index") }
     var icon: String { "sun.max.fill" }
     var iconColor: Color { .orange }
     var isRelevant: Bool { current.isDaytime && current.uvIndex >= 3 }
     var value: String { "\(Int(current.uvIndex))" }
+    var trendValues: [Double]? {
+        let values = hourly.prefix(8).compactMap(\.uvIndex)
+        return values.count >= 2 ? values : nil
+    }
+    var trendColor: Color? { .orange }
 }
 
 struct PressureCard: WeatherCard {
     let current: CurrentWeather
+    let hourly: [HourlyForecast]
     var title: String { String(localized: "Pressure") }
     var icon: String { "gauge.medium" }
     var iconColor: Color { .purple }
@@ -55,19 +80,31 @@ struct PressureCard: WeatherCard {
         return hPa < 1000 || hPa > 1025
     }
     var value: String { current.pressure.formattedPressure }
+    var trendValues: [Double]? {
+        let values = hourly.prefix(8).compactMap { $0.pressure?.converted(to: .hectopascals).value }
+        return values.count >= 2 ? values : nil
+    }
+    var trendColor: Color? { .purple }
 }
 
 struct CloudCoverCard: WeatherCard {
     let current: CurrentWeather
+    let hourly: [HourlyForecast]
     var title: String { String(localized: "Cloud Cover") }
     var icon: String { "cloud.fill" }
     var iconColor: Color { .gray }
     var isRelevant: Bool { current.cloudCover > 0 }
     var value: String { "\(Int(current.cloudCover))%" }
+    var trendValues: [Double]? {
+        let values = hourly.prefix(8).compactMap(\.cloudCover)
+        return values.count >= 2 ? values : nil
+    }
+    var trendColor: Color? { .gray }
 }
 
 struct VisibilityCard: WeatherCard {
     let current: CurrentWeather
+    let hourly: [HourlyForecast]
     var title: String { String(localized: "Visibility") }
     var icon: String { "eye.fill" }
     var iconColor: Color { .mint }
@@ -78,10 +115,16 @@ struct VisibilityCard: WeatherCard {
     var value: String {
         current.visibility?.formattedVisibility ?? ""
     }
+    var trendValues: [Double]? {
+        let values = hourly.prefix(8).compactMap { $0.visibility?.converted(to: .kilometers).value }
+        return values.count >= 2 ? values : nil
+    }
+    var trendColor: Color? { .mint }
 }
 
 struct DewPointCard: WeatherCard {
     let current: CurrentWeather
+    let hourly: [HourlyForecast]
     let unit: TemperatureUnit
     var title: String { String(localized: "Dew Point") }
     var icon: String { "drop.degreesign.fill" }
@@ -92,6 +135,11 @@ struct DewPointCard: WeatherCard {
         return celsius >= 16 || celsius <= -5
     }
     var value: String { current.dewPoint?.formatted(as: unit) ?? "" }
+    var trendValues: [Double]? {
+        let values = hourly.prefix(8).compactMap { $0.dewPoint?.converted(to: .celsius).value }
+        return values.count >= 2 ? values : nil
+    }
+    var trendColor: Color? { .teal }
 }
 
 struct SnowDepthCard: WeatherCard {
@@ -106,6 +154,14 @@ struct SnowDepthCard: WeatherCard {
     var value: String {
         current.snowDepth?.formattedSnowDepth ?? ""
     }
+    var customVisual: AnyView? {
+        guard let depth = current.snowDepth else { return nil }
+        let cm = depth.converted(to: .centimeters).value
+        return AnyView(
+            DepthBarView(depth: cm, maxDepth: 50)
+                .frame(width: 8, height: 16)
+        )
+    }
 }
 
 struct SunriseCard: WeatherCard {
@@ -118,6 +174,13 @@ struct SunriseCard: WeatherCard {
         guard let sunrise = today?.sunrise else { return "" }
         return sunrise.formatted(date: .omitted, time: .shortened)
     }
+    var customVisual: AnyView? {
+        guard let sunrise = today?.sunrise, let sunset = today?.sunset else { return nil }
+        return AnyView(
+            DayArcView(sunrise: sunrise, sunset: sunset, now: Date())
+                .frame(width: 44, height: 20)
+        )
+    }
 }
 
 struct SunsetCard: WeatherCard {
@@ -129,6 +192,13 @@ struct SunsetCard: WeatherCard {
     var value: String {
         guard let sunset = today?.sunset else { return "" }
         return sunset.formatted(date: .omitted, time: .shortened)
+    }
+    var customVisual: AnyView? {
+        guard let sunrise = today?.sunrise, let sunset = today?.sunset else { return nil }
+        return AnyView(
+            DayArcView(sunrise: sunrise, sunset: sunset, now: Date())
+                .frame(width: 44, height: 20)
+        )
     }
 }
 
@@ -155,6 +225,16 @@ struct AQICard: WeatherCard {
             case .hazardous: return .red
         }
     }
+    var customVisual: AnyView? {
+        guard let aq = airQuality else { return nil }
+        return AnyView(
+            GaugeArcView(
+                value: Double(aq.aqi), maxValue: 100,
+                colors: [.green, .yellow, .orange, .red, .purple]
+            )
+            .frame(width: 44, height: 20)
+        )
+    }
 }
 
 struct PM25Card: WeatherCard {
@@ -170,6 +250,16 @@ struct PM25Card: WeatherCard {
         guard let aq = airQuality else { return "" }
         return "\(Int(aq.pm25)) µg/m³"
     }
+    var customVisual: AnyView? {
+        guard let aq = airQuality else { return nil }
+        return AnyView(
+            GaugeArcView(
+                value: aq.pm25, maxValue: 75,
+                colors: [.green, .yellow, .orange, .red]
+            )
+            .frame(width: 44, height: 20)
+        )
+    }
 }
 
 struct PM10Card: WeatherCard {
@@ -184,6 +274,16 @@ struct PM10Card: WeatherCard {
     var value: String {
         guard let aq = airQuality else { return "" }
         return "\(Int(aq.pm10)) µg/m³"
+    }
+    var customVisual: AnyView? {
+        guard let aq = airQuality else { return nil }
+        return AnyView(
+            GaugeArcView(
+                value: aq.pm10, maxValue: 150,
+                colors: [.green, .yellow, .orange, .red]
+            )
+            .frame(width: 44, height: 20)
+        )
     }
 }
 
@@ -209,5 +309,18 @@ struct PollenCard: WeatherCard {
             case .high: return .orange
             case .veryHigh: return .red
         }
+    }
+    var customVisual: AnyView? {
+        guard let grains else { return nil }
+        let level = PollenLevel(grainsPerM3: grains)
+        let levelInt: Int = switch level {
+            case .low: 1
+            case .moderate: 2
+            case .high: 3
+            case .veryHigh: 4
+        }
+        return AnyView(
+            SeverityDotsView(level: levelInt, maxLevel: 4, activeColor: pollenColor)
+        )
     }
 }
