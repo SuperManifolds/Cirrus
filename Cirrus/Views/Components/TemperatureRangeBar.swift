@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 
 struct TemperatureRangeBar: View {
@@ -7,30 +8,28 @@ struct TemperatureRangeBar: View {
     let weekMax: Double
 
     var body: some View {
-        GeometryReader { geometry in
-            let range = weekMax - weekMin
-            let startFraction = range > 0 ? (dayLow - weekMin) / range : 0
-            let endFraction = range > 0 ? (dayHigh - weekMin) / range : 1
-
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(.quaternary)
-                    .frame(height: 4)
-
-                Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: [.blue, .yellow, .orange],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(
-                        width: max(4, geometry.size.width * (endFraction - startFraction)),
-                        height: 4
-                    )
-                    .offset(x: geometry.size.width * startFraction)
-            }
+        Chart {
+            BarMark(
+                xStart: .value("Low", dayLow),
+                xEnd: .value("High", dayHigh),
+                y: .value("Day", 0)
+            )
+            .foregroundStyle(
+                .linearGradient(
+                    colors: [.blue, .yellow, .orange],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+            )
+            .cornerRadius(2)
+        }
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartLegend(.hidden)
+        .chartXScale(domain: weekMin ... weekMax)
+        .chartPlotStyle { plot in
+            plot.background(.quaternary.opacity(0.5))
+                .cornerRadius(2)
         }
         .frame(height: 4)
     }
@@ -38,8 +37,14 @@ struct TemperatureRangeBar: View {
 
 #if DEBUG
 #Preview {
-    TemperatureRangeBar(dayLow: 14, dayHigh: 24, weekMin: 10, weekMax: 28)
-        .frame(width: 100)
-        .padding()
+    VStack(spacing: 8) {
+        TemperatureRangeBar(dayLow: 14, dayHigh: 24, weekMin: 10, weekMax: 28)
+            .frame(width: 100)
+        TemperatureRangeBar(dayLow: 10, dayHigh: 18, weekMin: 10, weekMax: 28)
+            .frame(width: 100)
+        TemperatureRangeBar(dayLow: 20, dayHigh: 28, weekMin: 10, weekMax: 28)
+            .frame(width: 100)
+    }
+    .padding()
 }
 #endif
