@@ -137,19 +137,25 @@ final class WeatherViewModel: ObservableObject {
         }
         previousHadRain = hasRain
 
-        // Pollen alerts
+        // Pollen alerts (once per type per calendar day)
         if let pollen {
+            let today = Calendar.current.startOfDay(for: Date())
             let types: [(String, Double?)] = [
-                (String(localized: "Birch"), pollen.birch),
-                (String(localized: "Grass"), pollen.grass),
-                (String(localized: "Alder"), pollen.alder)
+                ("Birch", pollen.birch),
+                ("Grass", pollen.grass),
+                ("Alder", pollen.alder)
             ]
             for (name, value) in types {
                 guard let amount = value else { continue }
                 let level = PollenLevel(grainsPerM3: amount)
-                if level == .high || level == .veryHigh {
-                    notificationService.postPollenAlert(type: name, level: level)
-                }
+                guard level == .high || level == .veryHigh else { continue }
+
+                let key = "lastPollenNotification_\(name)"
+                let lastNotified = UserDefaults.standard.object(forKey: key) as? Date ?? .distantPast
+                guard lastNotified < today else { continue }
+
+                notificationService.postPollenAlert(type: name, level: level)
+                UserDefaults.standard.set(Date(), forKey: key)
             }
         }
     }
