@@ -11,12 +11,10 @@ struct GaugeArcView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let dotSize: CGFloat = 5
-            let strokeWidth: CGFloat = 2.5
-            let inset = dotSize / 2 + strokeWidth
+            let strokeWidth: CGFloat = 3
             let radius = min(
-                (geometry.size.width - inset * 2) / 2,
-                geometry.size.height - inset
+                (geometry.size.width - strokeWidth) / 2,
+                geometry.size.height - strokeWidth / 2
             )
             let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height)
 
@@ -40,17 +38,6 @@ struct GaugeArcView: View {
                 .frame(width: radius * 2, height: radius)
                 .position(x: center.x, y: center.y - radius / 2)
 
-            // Needle dot
-            let angle = Double.pi * (1 - fraction)
-            let dotX = center.x + radius * cos(angle)
-            let dotY = center.y - radius * sin(angle)
-            let dotColor = interpolateColor(fraction: fraction)
-
-            Circle()
-                .fill(dotColor)
-                .frame(width: dotSize, height: dotSize)
-                .shadow(color: dotColor.opacity(0.4), radius: 2)
-                .position(x: dotX, y: dotY)
         }
     }
 

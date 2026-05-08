@@ -45,7 +45,6 @@ final class WeatherViewModel: ObservableObject {
 
         locationProvider.currentLocationPublisher
             .receive(on: RunLoop.main)
-            .removeDuplicates()
             .sink { [weak self] location in
                 guard let self, location != nil else { return }
                 Task { await self.refresh() }
@@ -59,49 +58,56 @@ final class WeatherViewModel: ObservableObject {
             return
         }
 
-        if let cached = await cache.get(for: location) {
+        let useCache = await cache.get(for: location)
+        if let cached = useCache {
             snapshot = cached
-            // Refresh in background if cache is older than half the max age
-            let age = Date().timeIntervalSince(cached.fetchedAt)
-            if age > WeatherDefaults.cacheMaxAge / 2 {
-                Task { await fetchFresh(for: location) }
-            }
-            return
         }
 
-        isLoading = true
-        error = nil
-        await fetchFresh(for: location)
-        isLoading = false
+        if useCache == nil {
+            isLoading = true
+            error = nil
+        }
+
+        await fetchFresh(for: location, skipWeather: useCache != nil)
+
+        if useCache == nil {
+            isLoading = false
+        }
     }
 
-    private func fetchFresh(for location: Location) async {
+    private func fetchFresh(for location: Location, skipWeather: Bool = false) async {
         do {
-            async let weatherFetch = weatherProvider.fetchWeather(for: location)
-            async let aqFetch = airQualityProvider.fetchAirQuality(for: location)
-            async let pollenFetch = pollenProvider.fetchPollen(for: location)
+            if !skipWeather {
+                async let weatherFetch = weatherProvider.fetchWeather(for: location)
+                async let aqFetch = airQualityProvider.fetchAirQuality(for: location)
+                async let pollenFetch = pollenProvider.fetchPollen(for: location)
 
-            let result = try await weatherFetch
-            snapshot = result
-            await cache.store(result)
-            airQuality = try? await aqFetch
-            pollen = try? await pollenFetch
-            Log.weather.debug("Fetched weather for \(location.name)")
-
-            Log.weather.debug("AI summary enabled: \(self.enableAISummary)")
-            if enableAISummary {
-                summary = await summaryService.generateSummary(
-                    from: result,
-                    airQuality: airQuality,
-                    pollen: pollen,
-                    unit: temperatureUnit
-                )
+                let result = try await weatherFetch
+                snapshot = result
+                await cache.store(result)
+                airQuality = try? await aqFetch
+                pollen = try? await pollenFetch
             } else {
-                summary = nil
+                async let aqFetch = airQualityProvider.fetchAirQuality(for: location)
+                async let pollenFetch = pollenProvider.fetchPollen(for: location)
+                airQuality = try? await aqFetch
+                pollen = try? await pollenFetch
             }
+            Log.weather.debug("Fetched data for \(location.name)")
 
-            if enableNotifications {
-                checkNotifications(result: result, pollen: pollen)
+            if let currentSnapshot = snapshot {
+                if enableAISummary && !skipWeather {
+                    summary = await summaryService.generateSummary(
+                        from: currentSnapshot,
+                        airQuality: airQuality,
+                        pollen: pollen,
+                        unit: temperatureUnit
+                    )
+                }
+
+                if enableNotifications && !skipWeather {
+                    checkNotifications(result: currentSnapshot, pollen: pollen)
+                }
             }
         } catch {
             self.error = error.localizedDescription

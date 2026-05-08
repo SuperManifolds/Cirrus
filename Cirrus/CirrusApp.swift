@@ -83,15 +83,17 @@ struct CirrusApp: App {
         _weatherViewModel = State(wrappedValue: weatherVM)
         _locationSearchViewModel = State(wrappedValue: LocationSearchViewModel(locationProvider: locService))
 
-        if settings.useCurrentLocation {
-            locService.requestAuthorization()
-        } else if let pinned = settings.pinnedLocation {
-            locService.currentLocation = pinned
-        }
-
         weatherVM.startAutoRefresh(interval: settings.refreshInterval.duration)
 
-        Task { await weatherVM.refresh() }
+        if settings.useCurrentLocation {
+            locService.requestAuthorization()
+            // Location will arrive via CLLocationManager delegate → Combine subscription → refresh()
+        } else if let pinned = settings.pinnedLocation {
+            locService.currentLocation = pinned
+            // Combine subscription fires on this change, but also refresh explicitly
+            // in case subscription isn't active yet
+            Task { await weatherVM.refresh() }
+        }
     }
 
     private func handleLocationChange(useCurrentLocation: Bool) {
