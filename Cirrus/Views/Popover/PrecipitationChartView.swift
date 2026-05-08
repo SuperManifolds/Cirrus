@@ -1,70 +1,79 @@
+import Charts
 import SwiftUI
 
 struct PrecipitationChartView: View {
     let minutely: [MinuteForecast]
-    @State private var hoveredIndex: Int?
-
-    private var maxIntensity: Double {
-        max(minutely.map(\.precipitationIntensity).max() ?? 0, LayoutConstants.Size.precipMinIntensity)
-    }
+    @State private var selectedEntry: MinuteForecast?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(hoveredIndex != nil ? tooltipText : summaryText)
+            Text(selectedEntry != nil ? tooltipText : summaryText)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .animation(.none, value: hoveredIndex)
 
-            HStack(alignment: .bottom, spacing: 2) {
-                ForEach(Array(minutely.enumerated()), id: \.element.id) { index, entry in
-                    RoundedRectangle(cornerRadius: LayoutConstants.Size.precipBarCornerRadius)
-                        .fill(barColor(index: index, intensity: entry.precipitationIntensity))
-                        .frame(height: barHeight(for: entry.precipitationIntensity))
-                        .onHover { hovering in
-                            hoveredIndex = hovering ? index : nil
+            Chart(minutely) { entry in
+                BarMark(
+                    x: .value("Time", entry.date),
+                    y: .value("Intensity", entry.precipitationIntensity)
+                )
+                .foregroundStyle(
+                    entry.id == selectedEntry?.id
+                        ? .cyan.opacity(0.9)
+                        : (entry.precipitationIntensity > 0
+                            ? .cyan
+                            : .cyan.opacity(LayoutConstants.Opacity.precipBarEmpty))
+                )
+                .cornerRadius(LayoutConstants.Size.precipBarCornerRadius)
+            }
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .minute, count: stride)) {
+                    AxisValueLabel(format: .dateTime.hour().minute())
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .chartYAxis(.hidden)
+            .chartYScale(domain: 0 ... max(
+                minutely.map(\.precipitationIntensity).max() ?? 0.5,
+                LayoutConstants.Size.precipMinIntensity
+            ))
+            .chartOverlay { proxy in
+                GeometryReader { _ in
+                    Rectangle()
+                        .fill(.clear)
+                        .contentShape(Rectangle())
+                        .onContinuousHover { phase in
+                            switch phase {
+                                case .active(let location):
+                                    if let date: Date = proxy.value(atX: location.x) {
+                                        selectedEntry = minutely.min(by: {
+                                            abs($0.date.timeIntervalSince(date))
+                                                < abs($1.date.timeIntervalSince(date))
+                                        })
+                                    }
+                                case .ended:
+                                    selectedEntry = nil
+                            }
                         }
                 }
             }
             .frame(height: LayoutConstants.Size.precipBarHeight)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(summaryText)
-
-            HStack {
-                if let first = minutely.first {
-                    Text(first.date.formatted(date: .omitted, time: .shortened))
-                }
-                Spacer()
-                if let last = minutely.last {
-                    Text(last.date.formatted(date: .omitted, time: .shortened))
-                }
-            }
-            .font(.caption2)
-            .foregroundStyle(.tertiary)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
     }
 
-    private func barColor(index: Int, intensity: Double) -> Color {
-        if index == hoveredIndex {
-            return .cyan.opacity(0.9)
-        }
-        return intensity > 0 ? .cyan : .cyan.opacity(LayoutConstants.Opacity.precipBarEmpty)
-    }
-
-    private func barHeight(for intensity: Double) -> CGFloat {
-        let minHeight = LayoutConstants.Size.precipBarMinHeight
-        let maxHeight = LayoutConstants.Size.precipBarHeight
-        guard intensity > 0 else { return minHeight }
-        let fraction = min(intensity / maxIntensity, 1.0)
-        return minHeight + (maxHeight - minHeight) * fraction
+    private var stride: Int {
+        let count = minutely.count
+        if count <= 4 { return 15 }
+        if count <= 12 { return 5 }
+        return 10
     }
 
     private var tooltipText: String {
-        guard let index = hoveredIndex, minutely.indices.contains(index) else {
-            return summaryText
-        }
-        let entry = minutely[index]
+        guard let entry = selectedEntry else { return summaryText }
         let time = entry.date.formatted(date: .omitted, time: .shortened)
         let measurement = Measurement(value: entry.precipitationIntensity, unit: UnitLength.millimeters)
         let formatted = measurement.formatted(

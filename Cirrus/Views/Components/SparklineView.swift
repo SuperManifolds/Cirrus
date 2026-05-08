@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 
 struct SparklineView: View {
@@ -5,26 +6,18 @@ struct SparklineView: View {
     var color: Color = .secondary
 
     var body: some View {
-        GeometryReader { geometry in
-            let minVal = values.min() ?? 0
-            let maxVal = values.max() ?? 1
-            let range = maxVal - minVal
-            let safeRange = range > 0 ? range : 1
-
-            Path { path in
-                for (index, value) in values.enumerated() {
-                    let pointX = geometry.size.width * Double(index) / Double(values.count - 1)
-                    let pointY = geometry.size.height * (1 - (value - minVal) / safeRange)
-
-                    if index == 0 {
-                        path.move(to: CGPoint(x: pointX, y: pointY))
-                    } else {
-                        path.addLine(to: CGPoint(x: pointX, y: pointY))
-                    }
-                }
-            }
-            .stroke(color, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+        Chart(Array(values.enumerated()), id: \.offset) { index, value in
+            LineMark(
+                x: .value("Index", index),
+                y: .value("Value", value)
+            )
+            .foregroundStyle(color)
+            .interpolationMethod(.catmullRom)
         }
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .chartLegend(.hidden)
+        .chartYScale(domain: .automatic(includesZero: false))
     }
 }
 
