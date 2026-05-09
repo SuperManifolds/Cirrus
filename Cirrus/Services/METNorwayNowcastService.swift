@@ -14,8 +14,8 @@ struct METNorwayNowcastService: Sendable {
     func fetchNowcast(for location: Location) async throws -> [MinuteForecast]? {
         guard var components = URLComponents(string: Self.baseURL) else { return nil }
         components.queryItems = [
-            URLQueryItem(name: "lat", value: String(location.latitude)),
-            URLQueryItem(name: "lon", value: String(location.longitude))
+            URLQueryItem(name: "lat", value: String(format: "%.4f", location.latitude)),
+            URLQueryItem(name: "lon", value: String(format: "%.4f", location.longitude))
         ]
         guard let url = components.url else { return nil }
 
