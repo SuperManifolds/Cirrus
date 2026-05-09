@@ -100,7 +100,7 @@ struct MenuBarView: View {
                     .buttonStyle(.bordered)
                     .controlSize(.small)
                 }
-                .padding(20)
+                .padding(LayoutConstants.Padding.errorState)
                 Divider()
             } else {
                 VStack(spacing: 8) {
@@ -124,7 +124,7 @@ struct MenuBarView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                .padding(20)
+                .padding(LayoutConstants.Padding.errorState)
                 Divider()
             }
 

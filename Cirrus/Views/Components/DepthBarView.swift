@@ -8,10 +8,10 @@ struct DepthBarView: View {
         let fraction = min(depth / maxDepth, 1.0)
         GeometryReader { geometry in
             ZStack(alignment: .bottom) {
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.depthBar)
                     .fill(.primary.opacity(0.08))
 
-                RoundedRectangle(cornerRadius: 2)
+                RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.depthBar)
                     .fill(
                         LinearGradient(
                             colors: [.white.opacity(0.8), .blue.opacity(0.6)],

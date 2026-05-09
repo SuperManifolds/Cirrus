@@ -13,8 +13,8 @@ struct DayArcView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let dotSize: CGFloat = 6
-            let strokeWidth: CGFloat = 1.5
+            let dotSize = LayoutConstants.Size.arcDotSize
+            let strokeWidth = LayoutConstants.Size.arcStrokeWidth
             let inset = dotSize / 2 + strokeWidth
             let radius = min(
                 (geometry.size.width - inset * 2) / 2,

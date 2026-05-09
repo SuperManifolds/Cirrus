@@ -178,7 +178,7 @@ struct SnowDepthCard: WeatherCard {
         let cm = depth.converted(to: .centimeters).value
         return AnyView(
             DepthBarView(depth: cm, maxDepth: 50)
-                .frame(width: 8, height: 16)
+                .frame(width: LayoutConstants.Size.depthBarWidth, height: LayoutConstants.Size.depthBarHeight)
         )
     }
 }
@@ -197,7 +197,7 @@ struct SunriseCard: WeatherCard {
         guard let sunrise = today?.sunrise, let sunset = today?.sunset else { return nil }
         return AnyView(
             DayArcView(sunrise: sunrise, sunset: sunset, now: Date())
-                .frame(width: 44, height: 20)
+                .frame(width: LayoutConstants.Size.dayArcWidth, height: LayoutConstants.Size.dayArcHeight)
         )
     }
 }
@@ -216,7 +216,7 @@ struct SunsetCard: WeatherCard {
         guard let sunrise = today?.sunrise, let sunset = today?.sunset else { return nil }
         return AnyView(
             DayArcView(sunrise: sunrise, sunset: sunset, now: Date())
-                .frame(width: 44, height: 20)
+                .frame(width: LayoutConstants.Size.dayArcWidth, height: LayoutConstants.Size.dayArcHeight)
         )
     }
 }
@@ -251,7 +251,7 @@ struct AQICard: WeatherCard {
                 value: Double(aq.aqi), maxValue: 100,
                 colors: [.green, .yellow, .orange, .red, .purple]
             )
-            .frame(width: 44, height: 20)
+            .frame(width: LayoutConstants.Size.gaugeArcWidth, height: LayoutConstants.Size.gaugeArcHeight)
         )
     }
 }
@@ -276,7 +276,7 @@ struct PM25Card: WeatherCard {
                 value: aq.pm25, maxValue: 75,
                 colors: [.green, .yellow, .orange, .red]
             )
-            .frame(width: 44, height: 20)
+            .frame(width: LayoutConstants.Size.gaugeArcWidth, height: LayoutConstants.Size.gaugeArcHeight)
         )
     }
 }
@@ -301,7 +301,7 @@ struct PM10Card: WeatherCard {
                 value: aq.pm10, maxValue: 150,
                 colors: [.green, .yellow, .orange, .red]
             )
-            .frame(width: 44, height: 20)
+            .frame(width: LayoutConstants.Size.gaugeArcWidth, height: LayoutConstants.Size.gaugeArcHeight)
         )
     }
 }

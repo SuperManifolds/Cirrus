@@ -65,18 +65,16 @@ struct TemperatureRangeBar: View {
 
     private func colorForTemp(_ temp: Double) -> Color {
         let colors = Self.tempColors
-        if temp <= colors.first!.temp { return colors.first!.color }
-        if temp >= colors.last!.temp { return colors.last!.color }
-        for idx in 1..<colors.count {
-            if temp <= colors[idx].temp {
-                let prev = colors[idx - 1]
-                let next = colors[idx]
-                let fraction = (temp - prev.temp) / (next.temp - prev.temp)
-                // Return the closer colour
-                return fraction < 0.5 ? prev.color : next.color
-            }
+        guard let first = colors.first, let last = colors.last else { return .gray }
+        if temp <= first.temp { return first.color }
+        if temp >= last.temp { return last.color }
+        for idx in 1..<colors.count where temp <= colors[idx].temp {
+            let prev = colors[idx - 1]
+            let next = colors[idx]
+            let fraction = (temp - prev.temp) / (next.temp - prev.temp)
+            return fraction < 0.5 ? prev.color : next.color
         }
-        return colors.last!.color
+        return last.color
     }
 }
 

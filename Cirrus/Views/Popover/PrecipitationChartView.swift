@@ -91,8 +91,8 @@ struct PrecipitationChartView: View {
             .font(.caption2)
             .foregroundStyle(.tertiary)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, LayoutConstants.Padding.precipChart)
+        .padding(.vertical, LayoutConstants.Padding.precipChartVertical)
     }
 
     private var tooltipText: String {

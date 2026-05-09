@@ -28,7 +28,7 @@ struct LocationSearchHeader: View {
                     }
                     .buttonStyle(.plain)
                 }
-                .padding(LayoutConstants.CornerRadius.searchField)
+                .padding(LayoutConstants.Padding.searchField)
                 .background(
                     .primary.opacity(LayoutConstants.Opacity.searchFieldBackground),
                     in: RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.searchField)
@@ -155,7 +155,11 @@ struct LocationSearchHeader: View {
         .background(
             RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)
                 .fill(.ultraThickMaterial)
-                .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+                .shadow(
+                    color: .black.opacity(LayoutConstants.Opacity.searchShadow),
+                    radius: LayoutConstants.Opacity.searchShadowRadius,
+                    y: LayoutConstants.Opacity.searchShadowY
+                )
         )
     }
 }

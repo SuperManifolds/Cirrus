@@ -6,11 +6,11 @@ struct SeverityDotsView: View {
     let activeColor: Color
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: LayoutConstants.Spacing.severityDots) {
             ForEach(0..<maxLevel, id: \.self) { index in
                 Circle()
                     .fill(index < level ? activeColor : .primary.opacity(0.1))
-                    .frame(width: 5, height: 5)
+                    .frame(width: LayoutConstants.Size.severityDotSize, height: LayoutConstants.Size.severityDotSize)
             }
         }
     }

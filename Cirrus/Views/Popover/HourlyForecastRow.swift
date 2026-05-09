@@ -6,11 +6,11 @@ struct HourlyForecastRow: View {
     let isNow: Bool
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: LayoutConstants.Spacing.hourlyRow) {
             Text(isNow ? String(localized: "Now") : forecast.date.formatted(.dateTime.hour()))
                 .font(.caption2)
                 .foregroundStyle(isNow ? .primary : .secondary)
-                .frame(height: 14)
+                .frame(height: LayoutConstants.Size.hourlyTimeHeight)
 
             WeatherIcon(
                 condition: forecast.condition,
@@ -20,20 +20,20 @@ struct HourlyForecastRow: View {
             .frame(height: LayoutConstants.Size.hourlyIcon)
 
             TemperatureText(measurement: forecast.temperature, unit: unit, font: .caption)
-                .frame(height: 14)
+                .frame(height: LayoutConstants.Size.hourlyTempHeight)
 
             Text(forecast.precipitationProbability > 0 ? "\(Int(forecast.precipitationProbability))%" : " ")
                 .font(.caption2)
                 .foregroundStyle(precipColor)
-                .frame(height: 12)
+                .frame(height: LayoutConstants.Size.hourlyPrecipTextHeight)
 
             precipBar
-                .frame(height: 8)
+                .frame(height: LayoutConstants.Size.hourlyPrecipBarHeight)
         }
         .frame(width: LayoutConstants.Size.hourlyColumnWidth)
-        .padding(.vertical, 4)
+        .padding(.vertical, LayoutConstants.Size.hourlyVerticalPadding)
         .background(
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.hourlyRow)
                 .fill(conditionTint)
         )
     }
@@ -48,26 +48,27 @@ struct HourlyForecastRow: View {
     }
 
     private var precipColor: Color {
-        isSnowy ? .white.opacity(0.7) : .cyan
+        isSnowy ? .white.opacity(LayoutConstants.Opacity.snowPrecip) : .cyan
     }
 
     private var precipBar: some View {
         let mm = forecast.precipitation.converted(to: .millimeters).value
         let fraction = min(mm / 2.0, 1.0)
+        let barHeight = LayoutConstants.Size.hourlyPrecipBarHeight * fraction
         return VStack {
             Spacer(minLength: 0)
             RoundedRectangle(cornerRadius: 1)
                 .fill(mm > 0 ? precipColor : Color.clear)
-                .frame(width: 16, height: 8 * fraction)
+                .frame(width: LayoutConstants.Size.precipBarWidth, height: barHeight)
         }
     }
 
     private var conditionTint: Color {
         switch forecast.condition {
             case .rain, .heavyRain, .showers, .heavyShowers, .drizzle, .freezingDrizzle, .freezingRain:
-                return .cyan.opacity(0.08)
+                return .cyan.opacity(LayoutConstants.Opacity.rainTint)
             case .snow, .heavySnow, .snowShowers, .sleet:
-                return .white.opacity(0.08)
+                return .white.opacity(LayoutConstants.Opacity.snowTint)
             default:
                 return .clear
         }

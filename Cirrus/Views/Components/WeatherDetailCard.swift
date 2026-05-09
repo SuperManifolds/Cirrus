@@ -38,7 +38,7 @@ struct WeatherDetailCard: View {
                     visual
                 } else if customVisual == nil, let values = trendValues, values.count >= 2 {
                     SparklineView(values: values, color: trendColor ?? iconColor)
-                        .frame(width: 40, height: 16)
+                        .frame(width: LayoutConstants.Size.sparklineWidth, height: LayoutConstants.Size.sparklineHeight)
                 }
             }
             if let visual = customVisual, visualPlacement == .fullWidth {

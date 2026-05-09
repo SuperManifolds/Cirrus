@@ -11,7 +11,7 @@ struct GaugeArcView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let strokeWidth: CGFloat = 3
+            let strokeWidth = LayoutConstants.Size.gaugeStrokeWidth
             let radius = min(
                 (geometry.size.width - strokeWidth) / 2,
                 geometry.size.height - strokeWidth / 2
