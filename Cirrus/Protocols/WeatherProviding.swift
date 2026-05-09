@@ -121,14 +121,19 @@ struct MockWeatherProvider: WeatherProviding {
 
     static func mockMinutely() -> [MinuteForecast] {
         let now = Date()
+        let pattern: [Double] = [
+            0, 0, 0.2, 0.5, 1.2, 2.0, 3.5, 4.0,
+            3.2, 2.5, 1.8, 1.0, 0.4, 0.1, 0, 0,
+            0, 0, 0, 0.3, 0.8, 1.5, 0.6, 0
+        ]
         var results: [MinuteForecast] = []
-        for min in stride(from: 0, to: 60, by: 15) {
-            let date = Calendar.current.date(byAdding: .minute, value: min, to: now) ?? now
-            let intensity = min >= 15 && min <= 30 ? 2.5 : 0.0
+        for (idx, intensity) in pattern.enumerated() {
+            let date = Calendar.current.date(byAdding: .minute, value: idx * 5, to: now) ?? now
             results.append(MinuteForecast(
                 date: date,
                 precipitationIntensity: intensity,
-                precipitationChance: intensity > 0 ? 80 : 0
+                precipitationChance: intensity > 0 ? 80 : 0,
+                precipitationType: nil
             ))
         }
         return results

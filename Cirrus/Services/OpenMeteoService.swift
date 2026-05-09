@@ -217,7 +217,8 @@ struct OpenMeteoService: WeatherProviding {
             results.append(MinuteForecast(
                 date: om.time[idx],
                 precipitationIntensity: om.precipitation[idx],
-                precipitationChance: om.precipitation[idx] > 0 ? 100 : 0
+                precipitationChance: om.precipitation[idx] > 0 ? 100 : 0,
+                precipitationType: nil
             ))
         }
         return results

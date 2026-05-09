@@ -63,7 +63,8 @@ struct METNorwayNowcastService: Sendable {
             results.append(MinuteForecast(
                 date: entry.time,
                 precipitationIntensity: rate,
-                precipitationChance: rate > 0 ? 100 : 0
+                precipitationChance: rate > 0 ? 100 : 0,
+                precipitationType: nil
             ))
         }
         return results.isEmpty ? nil : results

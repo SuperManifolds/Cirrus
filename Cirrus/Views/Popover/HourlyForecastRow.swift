@@ -24,7 +24,7 @@ struct HourlyForecastRow: View {
 
             Text(forecast.precipitationProbability > 0 ? "\(Int(forecast.precipitationProbability))%" : " ")
                 .font(.caption2)
-                .foregroundStyle(.cyan)
+                .foregroundStyle(precipColor)
                 .frame(height: 12)
 
             precipBar
@@ -38,23 +38,36 @@ struct HourlyForecastRow: View {
         )
     }
 
+    private var isSnowy: Bool {
+        switch forecast.condition {
+            case .snow, .heavySnow, .snowShowers, .sleet:
+                return true
+            default:
+                return false
+        }
+    }
+
+    private var precipColor: Color {
+        isSnowy ? .white.opacity(0.7) : .cyan
+    }
+
     private var precipBar: some View {
         let mm = forecast.precipitation.converted(to: .millimeters).value
         let fraction = min(mm / 2.0, 1.0)
         return VStack {
             Spacer(minLength: 0)
             RoundedRectangle(cornerRadius: 1)
-                .fill(mm > 0 ? Color.cyan : Color.clear)
+                .fill(mm > 0 ? precipColor : Color.clear)
                 .frame(width: 16, height: 8 * fraction)
         }
     }
 
     private var conditionTint: Color {
         switch forecast.condition {
-            case .rain, .heavyRain, .showers, .heavyShowers, .drizzle:
+            case .rain, .heavyRain, .showers, .heavyShowers, .drizzle, .freezingDrizzle, .freezingRain:
                 return .cyan.opacity(0.08)
-            case .snow, .heavySnow, .snowShowers, .sleet, .freezingDrizzle, .freezingRain:
-                return .blue.opacity(0.06)
+            case .snow, .heavySnow, .snowShowers, .sleet:
+                return .white.opacity(0.08)
             default:
                 return .clear
         }
@@ -93,6 +106,23 @@ struct HourlyForecastRow: View {
                 windSpeed: Measurement(value: 15, unit: .kilometersPerHour),
                 cloudCover: 90, visibility: nil, dewPoint: nil,
                 pressure: nil, uvIndex: 1,
+                isDaytime: true
+            ),
+            unit: .celsius,
+            isNow: false
+        )
+        HourlyForecastRow(
+            forecast: HourlyForecast(
+                date: Date().addingTimeInterval(7200),
+                temperature: Measurement(value: -2, unit: .celsius),
+                apparentTemperature: Measurement(value: -6, unit: .celsius),
+                condition: .snow,
+                precipitationProbability: 90,
+                precipitation: Measurement(value: 1.5, unit: .millimeters),
+                humidity: 85,
+                windSpeed: Measurement(value: 20, unit: .kilometersPerHour),
+                cloudCover: 100, visibility: nil, dewPoint: nil,
+                pressure: nil, uvIndex: 0,
                 isDaytime: true
             ),
             unit: .celsius,

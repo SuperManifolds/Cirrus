@@ -43,7 +43,7 @@ struct MenuBarView: View {
                 if let minutely = snapshot.minutely,
                    minutely.contains(where: { $0.precipitationIntensity > 0 }) {
                     Divider()
-                    PrecipitationChartView(minutely: minutely)
+                    PrecipitationChartView(minutely: minutely, condition: snapshot.current.condition)
                 }
 
                 Divider()

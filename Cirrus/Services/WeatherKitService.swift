@@ -128,10 +128,18 @@ struct WeatherKitService: WeatherProviding {
         let minutes = Array(forecast.prefix(60))
         guard !minutes.isEmpty else { return nil }
         return minutes.map { minute in
-            MinuteForecast(
+            let precipType: PrecipitationType? = switch minute.precipitation {
+                case .rain, .hail: .rain
+                case .snow: .snow
+                case .sleet: .sleet
+                case .none: .none
+                @unknown default: nil
+            }
+            return MinuteForecast(
                 date: minute.date,
                 precipitationIntensity: minute.precipitationIntensity.value,
-                precipitationChance: minute.precipitationChance * 100
+                precipitationChance: minute.precipitationChance * 100,
+                precipitationType: precipType
             )
         }
     }
