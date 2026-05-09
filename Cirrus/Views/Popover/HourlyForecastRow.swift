@@ -10,20 +10,25 @@ struct HourlyForecastRow: View {
             Text(isNow ? String(localized: "Now") : forecast.date.formatted(.dateTime.hour()))
                 .font(.caption2)
                 .foregroundStyle(isNow ? .primary : .secondary)
+                .frame(height: 14)
 
             WeatherIcon(
                 condition: forecast.condition,
                 isDaytime: forecast.isDaytime,
                 size: LayoutConstants.Size.hourlyIcon
             )
+            .frame(height: LayoutConstants.Size.hourlyIcon)
 
             TemperatureText(measurement: forecast.temperature, unit: unit, font: .caption)
+                .frame(height: 14)
 
-            Text(forecast.precipitationProbability > 0 ? "\(Int(forecast.precipitationProbability))%" : "")
+            Text(forecast.precipitationProbability > 0 ? "\(Int(forecast.precipitationProbability))%" : " ")
                 .font(.caption2)
                 .foregroundStyle(.cyan)
+                .frame(height: 12)
 
             precipBar
+                .frame(height: 8)
         }
         .frame(width: LayoutConstants.Size.hourlyColumnWidth)
         .padding(.vertical, 4)
@@ -35,10 +40,13 @@ struct HourlyForecastRow: View {
 
     private var precipBar: some View {
         let mm = forecast.precipitation.converted(to: .millimeters).value
-        let height = min(mm / 2.0, 1.0) * 8.0
-        return RoundedRectangle(cornerRadius: 1)
-            .fill(mm > 0 ? Color.cyan : Color.clear)
-            .frame(width: 16, height: max(height, 0))
+        let fraction = min(mm / 2.0, 1.0)
+        return VStack {
+            Spacer(minLength: 0)
+            RoundedRectangle(cornerRadius: 1)
+                .fill(mm > 0 ? Color.cyan : Color.clear)
+                .frame(width: 16, height: 8 * fraction)
+        }
     }
 
     private var conditionTint: Color {

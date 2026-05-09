@@ -25,13 +25,7 @@ struct PrecipitationChartView: View {
                 )
                 .cornerRadius(LayoutConstants.Size.precipBarCornerRadius)
             }
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .minute, count: stride)) {
-                    AxisValueLabel(format: .dateTime.hour().minute())
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                }
-            }
+            .chartXAxis(.hidden)
             .chartYAxis(.hidden)
             .chartYScale(domain: 0 ... max(
                 minutely.map(\.precipitationIntensity).max() ?? 0.5,
@@ -60,16 +54,21 @@ struct PrecipitationChartView: View {
             .frame(height: LayoutConstants.Size.precipBarHeight)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(summaryText)
+
+            HStack {
+                if let first = minutely.first {
+                    Text(first.date.formatted(date: .omitted, time: .shortened))
+                }
+                Spacer()
+                if let last = minutely.last {
+                    Text(last.date.formatted(date: .omitted, time: .shortened))
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.tertiary)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-    }
-
-    private var stride: Int {
-        let count = minutely.count
-        if count <= 4 { return 15 }
-        if count <= 12 { return 5 }
-        return 10
     }
 
     private var tooltipText: String {
