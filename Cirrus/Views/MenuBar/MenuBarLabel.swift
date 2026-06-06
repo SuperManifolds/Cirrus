@@ -12,13 +12,27 @@ struct MenuBarLabel: View {
         return "cloud.sun.fill"
     }
 
+    private var hasAlerts: Bool {
+        guard let alerts = weatherViewModel.snapshot?.alerts else { return false }
+        return !alerts.isEmpty
+    }
+
     var body: some View {
         HStack(spacing: 4) {
-            if settingsViewModel.coloredMenuBarIcon {
-                Image(nsImage: coloredIcon)
-            } else {
-                Image(systemName: symbolName)
-                    .symbolRenderingMode(.monochrome)
+            ZStack(alignment: .topTrailing) {
+                if settingsViewModel.coloredMenuBarIcon {
+                    Image(nsImage: coloredIcon)
+                } else {
+                    Image(systemName: symbolName)
+                        .symbolRenderingMode(.monochrome)
+                }
+
+                if hasAlerts {
+                    Circle()
+                        .fill(.red)
+                        .frame(width: 6, height: 6)
+                        .offset(x: 2, y: -2)
+                }
             }
 
             switch settingsViewModel.menuBarDisplayMode {
