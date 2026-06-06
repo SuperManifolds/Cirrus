@@ -116,21 +116,33 @@ struct LocationSearchHeader: View {
             if !settingsViewModel.favoriteLocations.isEmpty && !hasSearchQuery {
                 if isPinnedLocation { Divider() }
                 ForEach(settingsViewModel.favoriteLocations) { location in
-                    Button {
-                        onLocationSelected(location)
-                        isSearching = false
-                        searchViewModel.clearResults()
-                    } label: {
-                        HStack {
-                            Label(location.name, systemImage: "star.fill")
-                                .font(.callout)
-                            Spacer()
+                    HStack {
+                        Button {
+                            onLocationSelected(location)
+                            isSearching = false
+                            searchViewModel.clearResults()
+                        } label: {
+                            HStack {
+                                Label(location.name, systemImage: "star.fill")
+                                    .font(.callout)
+                                Spacer()
+                            }
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .contentShape(Rectangle())
+                        .buttonStyle(.plain)
+
+                        Button {
+                            settingsViewModel.removeFavorite(location)
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(String(localized: "Remove \(location.name) from favorites"))
                     }
-                    .buttonStyle(.plain)
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 6)
                 }
             }
 
@@ -157,26 +169,46 @@ struct LocationSearchHeader: View {
             }
 
             ForEach(searchViewModel.results) { location in
-                Button {
-                    onLocationSelected(location)
-                    isSearching = false
-                    searchViewModel.clearResults()
-                } label: {
-                    HStack {
-                        Text(location.name)
-                            .font(.callout)
-                        if let area = location.administrativeArea {
-                            Text(area)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                HStack {
+                    Button {
+                        onLocationSelected(location)
+                        isSearching = false
+                        searchViewModel.clearResults()
+                    } label: {
+                        HStack {
+                            Text(location.name)
+                                .font(.callout)
+                            if let area = location.administrativeArea {
+                                Text(area)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
                         }
-                        Spacer()
+                        .contentShape(Rectangle())
                     }
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 6)
-                    .contentShape(Rectangle())
+                    .buttonStyle(.plain)
+
+                    Button {
+                        if settingsViewModel.isFavorite(location) {
+                            settingsViewModel.removeFavorite(location)
+                        } else {
+                            settingsViewModel.addFavorite(location)
+                        }
+                    } label: {
+                        Image(systemName: settingsViewModel.isFavorite(location) ? "star.fill" : "star")
+                            .font(.caption)
+                            .foregroundStyle(settingsViewModel.isFavorite(location) ? .yellow : .secondary.opacity(0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(
+                        settingsViewModel.isFavorite(location)
+                            ? String(localized: "Remove from favorites")
+                            : String(localized: "Add to favorites")
+                    )
                 }
-                .buttonStyle(.plain)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 6)
             }
         }
         .padding(LayoutConstants.Padding.card)
