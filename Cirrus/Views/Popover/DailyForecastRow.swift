@@ -41,6 +41,15 @@ struct DailyForecastRow: View {
 
             TemperatureText(measurement: forecast.highTemperature, unit: unit, font: .caption)
                 .frame(width: LayoutConstants.Size.dailyTempWidth, alignment: .trailing)
+
+            if let direction = forecast.windDirectionDominant {
+                Image(systemName: "arrow.down")
+                    .font(.system(size: 8, weight: .semibold))
+                    .foregroundStyle(.secondary.opacity(0.6))
+                    .rotationEffect(.degrees(direction))
+                    .frame(width: 10)
+                    .accessibilityHidden(true)
+            }
         }
         .padding(.horizontal, LayoutConstants.Padding.sectionHorizontal)
         .accessibilityElement(children: .combine)
@@ -55,6 +64,9 @@ struct DailyForecastRow: View {
         var label = "\(day), \(condition), \(low) to \(high)"
         if forecast.precipitationProbability > 0 {
             label += ", \(Int(forecast.precipitationProbability))% precipitation"
+        }
+        if let direction = forecast.windDirectionDominant {
+            label += ", wind \(compassDirection(from: direction))"
         }
         return label
     }
