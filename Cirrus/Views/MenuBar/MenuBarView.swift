@@ -39,7 +39,9 @@ struct MenuBarView: View {
                         settingsViewModel.pinnedLocation = nil
                         locationService.requestAuthorization()
                         locationService.requestLocation()
-                    }
+                    },
+                    onRefresh: { Task { await weatherViewModel.refresh() } },
+                    isLoading: weatherViewModel.isLoading
                 )
 
                 if let minutely = snapshot.minutely,
@@ -140,6 +142,11 @@ struct MenuBarView: View {
             )
         }
         .frame(width: WeatherDefaults.popoverWidth)
+        .background {
+            Button("") { Task { await weatherViewModel.refresh() } }
+                .keyboardShortcut("r", modifiers: .command)
+                .hidden()
+        }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: weatherViewModel.snapshot != nil)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: weatherViewModel.isLoading)
     }

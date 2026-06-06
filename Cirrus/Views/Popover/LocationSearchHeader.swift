@@ -7,6 +7,8 @@ struct LocationSearchHeader: View {
     @ObservedObject var settingsViewModel: SettingsViewModel
     var onLocationSelected: (Location) -> Void
     var onUseCurrentLocation: () -> Void
+    var onRefresh: () -> Void
+    var isLoading: Bool
     @State private var isSearching = false
     @FocusState private var isTextFieldFocused: Bool
 
@@ -34,21 +36,41 @@ struct LocationSearchHeader: View {
                     in: RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.searchField)
                 )
             } else {
-                Button {
-                    isSearching = true
-                    isTextFieldFocused = true
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(locationName)
-                            .font(.headline)
-                        Image(systemName: "chevron.down")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                HStack {
+                    Button {
+                        isSearching = true
+                        isTextFieldFocused = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text(locationName)
+                                .font(.headline)
+                            Image(systemName: "chevron.down")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
                     }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(String(localized: "Location: \(locationName)"))
+                    .accessibilityHint(String(localized: "Double-tap to search for a location"))
+
+                    Spacer()
+
+                    Button {
+                        onRefresh()
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .rotationEffect(.degrees(isLoading ? 360 : 0))
+                            .animation(
+                                isLoading ? .linear(duration: 1).repeatForever(autoreverses: false) : .default,
+                                value: isLoading
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isLoading)
+                    .accessibilityLabel(String(localized: "Refresh weather"))
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel(String(localized: "Location: \(locationName)"))
-                .accessibilityHint(String(localized: "Double-tap to search for a location"))
             }
         }
         .overlay(alignment: .top) {
@@ -174,7 +196,9 @@ struct LocationSearchHeader: View {
         searchViewModel: LocationSearchViewModel.preview(),
         settingsViewModel: SettingsViewModel.preview(),
         onLocationSelected: { _ in },
-        onUseCurrentLocation: {}
+        onUseCurrentLocation: {},
+        onRefresh: {},
+        isLoading: false
     )
     .frame(width: 320)
     .padding()
@@ -187,7 +211,9 @@ struct LocationSearchHeader: View {
         searchViewModel: LocationSearchViewModel.preview(),
         settingsViewModel: SettingsViewModel.preview(),
         onLocationSelected: { _ in },
-        onUseCurrentLocation: {}
+        onUseCurrentLocation: {},
+        onRefresh: {},
+        isLoading: false
     )
     .frame(width: 320)
     .padding()

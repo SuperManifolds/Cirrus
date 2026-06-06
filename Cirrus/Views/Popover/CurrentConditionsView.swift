@@ -14,6 +14,8 @@ struct CurrentConditionsView: View {
     @ObservedObject var settingsViewModel: SettingsViewModel
     var onLocationSelected: (Location) -> Void
     var onUseCurrentLocation: () -> Void
+    var onRefresh: () -> Void
+    var isLoading: Bool
 
     var body: some View {
         VStack(spacing: 10) {
@@ -23,7 +25,9 @@ struct CurrentConditionsView: View {
                 searchViewModel: locationSearchViewModel,
                 settingsViewModel: settingsViewModel,
                 onLocationSelected: onLocationSelected,
-                onUseCurrentLocation: onUseCurrentLocation
+                onUseCurrentLocation: onUseCurrentLocation,
+                onRefresh: onRefresh,
+                isLoading: isLoading
             )
             .padding(.bottom, 2)
 
@@ -146,7 +150,9 @@ struct CurrentConditionsView: View {
         locationSearchViewModel: LocationSearchViewModel.preview(),
         settingsViewModel: SettingsViewModel.preview(),
         onLocationSelected: { _ in },
-        onUseCurrentLocation: {}
+        onUseCurrentLocation: {},
+        onRefresh: {},
+        isLoading: false
     )
     .frame(width: 320)
 }
