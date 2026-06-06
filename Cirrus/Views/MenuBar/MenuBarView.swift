@@ -131,7 +131,11 @@ struct MenuBarView: View {
                 Divider()
             }
 
-            MenuBarFooter(lastUpdated: weatherViewModel.snapshot?.fetchedAt)
+            MenuBarFooter(
+                lastUpdated: weatherViewModel.snapshot?.fetchedAt,
+                attributionName: weatherViewModel.snapshot?.attributionName,
+                attributionURL: weatherViewModel.snapshot?.attributionURL
+            )
         }
         .frame(width: WeatherDefaults.popoverWidth)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: weatherViewModel.snapshot != nil)

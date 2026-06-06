@@ -4,6 +4,14 @@ import WeatherKit
 
 struct WeatherKitService: WeatherProviding {
     let kind: WeatherProviderKind = .weatherKit
+    let displayName = String(localized: "Apple WeatherKit")
+    let providerDescription = String(localized: """
+        Apple WeatherKit requires an Apple Developer membership. \
+        Provides up to 500,000 API calls per month.
+        """)
+    let attributionName = "\u{F8FF} Weather"
+    // swiftlint:disable:next force_unwrapping
+    let attributionURL = URL(string: "https://weatherkit.apple.com/legal-attribution.html")!
 
     func fetchWeather(for location: Location) async throws -> WeatherSnapshot {
         let service = WeatherService.shared
@@ -32,7 +40,8 @@ struct WeatherKitService: WeatherProviding {
 
         return WeatherSnapshot(
             current: current, hourly: hourly, daily: daily, minutely: minutely,
-            alerts: alerts, location: location, fetchedAt: Date(), provider: .weatherKit
+            alerts: alerts, location: location, fetchedAt: Date(), provider: .weatherKit,
+            attributionName: attributionName, attributionURL: attributionURL
         )
     }
 

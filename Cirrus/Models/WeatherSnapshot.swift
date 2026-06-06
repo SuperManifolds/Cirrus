@@ -9,6 +9,8 @@ struct WeatherSnapshot: Sendable, Codable {
     let location: Location
     let fetchedAt: Date
     let provider: WeatherProviderKind
+    let attributionName: String
+    let attributionURL: URL
 }
 
 enum WeatherProviderKind: String, Sendable, Codable, CaseIterable, Identifiable {
@@ -16,11 +18,4 @@ enum WeatherProviderKind: String, Sendable, Codable, CaseIterable, Identifiable 
     case weatherKit = "weatherkit"
 
     var id: String { rawValue }
-
-    var displayName: String {
-        switch self {
-            case .openMeteo: String(localized: "Open-Meteo")
-            case .weatherKit: String(localized: "Apple WeatherKit")
-        }
-    }
 }

@@ -113,7 +113,9 @@ struct WeatherCacheServiceTests {
             alerts: [],
             location: location,
             fetchedAt: Date(),
-            provider: .openMeteo
+            provider: .openMeteo,
+            attributionName: "Test",
+            attributionURL: URL(string: "https://example.com")!
         )
     }
 }

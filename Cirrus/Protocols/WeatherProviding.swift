@@ -2,6 +2,10 @@ import Foundation
 
 protocol WeatherProviding: Sendable {
     var kind: WeatherProviderKind { get }
+    var displayName: String { get }
+    var providerDescription: String { get }
+    var attributionName: String { get }
+    var attributionURL: URL { get }
     func fetchWeather(for location: Location) async throws -> WeatherSnapshot
 }
 
@@ -33,6 +37,11 @@ enum WeatherProviderError: LocalizedError {
 #if DEBUG
 struct MockWeatherProvider: WeatherProviding {
     let kind: WeatherProviderKind = .openMeteo
+    let displayName = "Mock"
+    let providerDescription = "Mock provider for previews and tests."
+    let attributionName = "Mock"
+    // swiftlint:disable:next force_unwrapping
+    let attributionURL = URL(string: "https://example.com")!
 
     func fetchWeather(for location: Location) async throws -> WeatherSnapshot {
         let current = CurrentWeather(
@@ -66,7 +75,9 @@ struct MockWeatherProvider: WeatherProviding {
             alerts: [],
             location: location,
             fetchedAt: Date(),
-            provider: .openMeteo
+            provider: .openMeteo,
+            attributionName: attributionName,
+            attributionURL: attributionURL
         )
     }
 

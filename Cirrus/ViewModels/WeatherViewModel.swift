@@ -161,12 +161,7 @@ final class WeatherViewModel: ObservableObject {
     }
 
     func switchProvider(to kind: WeatherProviderKind) {
-        switch kind {
-            case .openMeteo:
-                weatherProvider = OpenMeteoService()
-            case .weatherKit:
-                weatherProvider = WeatherKitService()
-        }
+        weatherProvider = WeatherProviderRegistry.provider(for: kind)
         Task {
             await cache.invalidate()
             await refresh()

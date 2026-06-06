@@ -3,6 +3,14 @@ import OSLog
 
 struct OpenMeteoService: WeatherProviding {
     let kind: WeatherProviderKind = .openMeteo
+    let displayName = String(localized: "Open-Meteo")
+    let providerDescription = String(localized: """
+        Open-Meteo provides free weather data with no API key required. \
+        Data is sourced from national weather services.
+        """)
+    let attributionName = "Open-Meteo.com"
+    // swiftlint:disable:next force_unwrapping
+    let attributionURL = URL(string: "https://open-meteo.com")!
     private let session: URLSession
     private let nowcastService: METNorwayNowcastService
 
@@ -118,7 +126,8 @@ struct OpenMeteoService: WeatherProviding {
         let minutely = nowcast ?? mapMinutely(response.minutely15)
         return WeatherSnapshot(
             current: current, hourly: hourly, daily: daily, minutely: minutely,
-            alerts: [], location: location, fetchedAt: Date(), provider: .openMeteo
+            alerts: [], location: location, fetchedAt: Date(), provider: .openMeteo,
+            attributionName: attributionName, attributionURL: attributionURL
         )
     }
 

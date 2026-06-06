@@ -68,7 +68,7 @@ struct CirrusApp: App {
     init() {
         let settings = SettingsViewModel()
         let locService = LocationService()
-        let provider: any WeatherProviding = Self.makeProvider(for: settings.weatherProvider)
+        let provider = WeatherProviderRegistry.provider(for: settings.weatherProvider)
 
         _settingsViewModel = StateObject(wrappedValue: settings)
         _locationService = State(wrappedValue: locService)
@@ -105,10 +105,4 @@ struct CirrusApp: App {
         }
     }
 
-    private static func makeProvider(for kind: WeatherProviderKind) -> any WeatherProviding {
-        switch kind {
-            case .openMeteo: OpenMeteoService()
-            case .weatherKit: WeatherKitService()
-        }
-    }
 }
