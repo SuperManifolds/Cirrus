@@ -1,9 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
   <channel>
     <title>Cirrus Updates</title>
     <link>https://supermanifolds.github.io/Cirrus/appcast.xml</link>
     <description>Most recent updates for Cirrus</description>
     <language>en</language>
+    <item>
+      <title>Version 0.1.0</title>
+      <pubDate>Sat, 06 Jun 2026 17:22:57 +0000</pubDate>
+      <sparkle:version>1</sparkle:version>
+      <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;style&gt;
+body { font-family: -apple-system, sans-serif; font-size: 13px; line-height: 1.5; color: -apple-system-label; }
+h2 { font-size: 15px; margin: 16px 0 8px; }
+h3 { font-size: 14px; margin: 12px 0 6px; }
+ul { padding-left: 20px; margin: 4px 0; }
+li { margin: 2px 0; }
+code { background: -apple-system-quaternary-label; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+a { color: -apple-system-blue; text-decoration: none; }
+&lt;/style&gt;
+&lt;p&gt;&lt;strong&gt;Full Changelog&lt;/strong&gt;: https://github.com/SuperManifolds/Cirrus/commits/v0.1.0&lt;/p&gt;</description>
+      <enclosure url="https://github.com/SuperManifolds/Cirrus/releases/download/v0.1.0/Cirrus.dmg" length="5701512" type="application/octet-stream" sparkle:edSignature="xYWRceOWCZ+UXmURzUvEhdI0fieyvqPqoAtiZIUcAqd4K6Zg/CWWqOysKApuJKdP4SWvWXL8rQwHJJTMfDs8AA==" />
+    </item>
   </channel>
 </rss>
