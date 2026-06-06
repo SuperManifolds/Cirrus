@@ -26,6 +26,7 @@ struct UVSeverityBar: View {
                     .frame(width: geometry.size.width * fraction)
             }
         }
+        .accessibilityHidden(true)
     }
 }
 

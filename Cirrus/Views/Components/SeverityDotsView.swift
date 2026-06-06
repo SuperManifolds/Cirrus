@@ -13,6 +13,7 @@ struct SeverityDotsView: View {
                     .frame(width: LayoutConstants.Size.severityDotSize, height: LayoutConstants.Size.severityDotSize)
             }
         }
+        .accessibilityHidden(true)
     }
 }
 

@@ -53,6 +53,7 @@ struct DayArcView: View {
                 .shadow(color: .yellow.opacity(0.5), radius: 3)
                 .position(x: dotX, y: dotY)
         }
+        .accessibilityHidden(true)
     }
 }
 

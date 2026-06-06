@@ -22,6 +22,7 @@ struct DepthBarView: View {
                     .frame(height: geometry.size.height * fraction)
             }
         }
+        .accessibilityHidden(true)
     }
 }
 

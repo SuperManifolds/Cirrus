@@ -47,6 +47,8 @@ struct LocationSearchHeader: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Location: \(locationName)"))
+                .accessibilityHint(String(localized: "Double-tap to search for a location"))
             }
         }
         .overlay(alignment: .top) {

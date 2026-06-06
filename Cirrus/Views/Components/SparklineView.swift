@@ -18,6 +18,7 @@ struct SparklineView: View {
         .chartYAxis(.hidden)
         .chartLegend(.hidden)
         .chartYScale(domain: .automatic(includesZero: false))
+        .accessibilityHidden(true)
     }
 }
 

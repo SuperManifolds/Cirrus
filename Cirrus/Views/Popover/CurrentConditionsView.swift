@@ -51,6 +51,8 @@ struct CurrentConditionsView: View {
                 }
             }
             .padding(.bottom, 2)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(String(localized: "\(current.condition.displayName), \(current.temperature.formatted(as: unit)), feels like \(current.apparentTemperature.formatted(as: unit))"))
 
             if let summary {
                 Text(summary)

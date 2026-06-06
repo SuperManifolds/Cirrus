@@ -39,6 +39,7 @@ struct GaugeArcView: View {
                 .position(x: center.x, y: center.y - radius / 2)
 
         }
+        .accessibilityHidden(true)
     }
 
     private func interpolateColor(fraction: Double) -> Color {

@@ -36,6 +36,20 @@ struct HourlyForecastRow: View {
             RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.hourlyRow)
                 .fill(conditionTint)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(hourlyAccessibilityLabel)
+    }
+
+    private var hourlyAccessibilityLabel: String {
+        let time = isNow ? String(localized: "Now") : forecast.date.formatted(.dateTime.hour())
+        let temp = forecast.temperature.formatted(as: unit)
+        let condition = forecast.condition.displayName
+        var label = "\(time), \(condition), \(temp)"
+        if forecast.precipitationProbability > 0 {
+            let precipType = isSnowy ? String(localized: "snow") : String(localized: "rain")
+            label += ", \(Int(forecast.precipitationProbability))% \(precipType)"
+        }
+        return label
     }
 
     private var isSnowy: Bool {

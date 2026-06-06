@@ -39,6 +39,7 @@ struct TemperatureRangeBar: View {
             }
         }
         .frame(height: 4)
+        .accessibilityHidden(true)
     }
 
     private var fullGradient: LinearGradient {

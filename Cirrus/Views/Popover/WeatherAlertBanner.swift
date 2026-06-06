@@ -3,6 +3,7 @@ import SwiftUI
 struct WeatherAlertBanner: View {
     let alerts: [WeatherAlert]
     @State private var expandedAlertID: String?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 4) {
@@ -31,10 +32,14 @@ struct WeatherAlertBanner: View {
                     .padding(LayoutConstants.Padding.card)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) {
                             expandedAlertID = expandedAlertID == alert.id ? nil : alert.id
                         }
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("\(alert.severity.displayName): \(alert.event)")
+                    .accessibilityValue(alert.headline)
+                    .accessibilityHint(String(localized: "Double-tap to expand or collapse"))
 
                     if expandedAlertID == alert.id {
                         VStack(alignment: .leading, spacing: 4) {

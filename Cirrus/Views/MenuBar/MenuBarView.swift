@@ -6,6 +6,7 @@ struct MenuBarView: View {
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var locationSearchViewModel: LocationSearchViewModel
     let locationService: LocationService
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 0) {
@@ -90,6 +91,7 @@ struct MenuBarView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.title2)
                         .foregroundStyle(.secondary)
+                        .accessibilityHidden(true)
                     Text(error)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -109,6 +111,7 @@ struct MenuBarView: View {
                         Image(systemName: "location.slash.fill")
                             .font(.title2)
                             .foregroundStyle(.red)
+                            .accessibilityHidden(true)
                         Text(String(localized: "Location access denied"))
                             .font(.caption)
                             .fontWeight(.medium)
@@ -131,8 +134,8 @@ struct MenuBarView: View {
             MenuBarFooter(lastUpdated: weatherViewModel.snapshot?.fetchedAt)
         }
         .frame(width: WeatherDefaults.popoverWidth)
-        .animation(.easeInOut(duration: 0.2), value: weatherViewModel.snapshot != nil)
-        .animation(.easeInOut(duration: 0.2), value: weatherViewModel.isLoading)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: weatherViewModel.snapshot != nil)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: weatherViewModel.isLoading)
     }
 }
 

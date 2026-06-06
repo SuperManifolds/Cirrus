@@ -43,6 +43,20 @@ struct DailyForecastRow: View {
                 .frame(width: LayoutConstants.Size.dailyTempWidth, alignment: .trailing)
         }
         .padding(.horizontal, LayoutConstants.Padding.sectionHorizontal)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(dailyAccessibilityLabel)
+    }
+
+    private var dailyAccessibilityLabel: String {
+        let day = isToday ? String(localized: "Today") : forecast.date.formatted(.dateTime.weekday(.wide))
+        let condition = forecast.condition.displayName
+        let low = forecast.lowTemperature.formatted(as: unit)
+        let high = forecast.highTemperature.formatted(as: unit)
+        var label = "\(day), \(condition), \(low) to \(high)"
+        if forecast.precipitationProbability > 0 {
+            label += ", \(Int(forecast.precipitationProbability))% precipitation"
+        }
+        return label
     }
 }
 
