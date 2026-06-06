@@ -61,6 +61,7 @@ struct LocationSearchHeader: View {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 11))
                                 .foregroundStyle(.tertiary)
+                                .padding(.trailing, 4)
                                 .rotationEffect(.degrees(isLoading ? 360 : 0))
                                 .animation(
                                     isLoading
