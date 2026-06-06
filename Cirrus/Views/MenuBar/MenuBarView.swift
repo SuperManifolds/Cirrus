@@ -5,6 +5,7 @@ struct MenuBarView: View {
     @ObservedObject var weatherViewModel: WeatherViewModel
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var locationSearchViewModel: LocationSearchViewModel
+    @ObservedObject var updaterViewModel: UpdaterViewModel
     let locationService: LocationService
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -134,7 +135,8 @@ struct MenuBarView: View {
             MenuBarFooter(
                 lastUpdated: weatherViewModel.snapshot?.fetchedAt,
                 attributionName: weatherViewModel.snapshot?.attributionName,
-                attributionURL: weatherViewModel.snapshot?.attributionURL
+                attributionURL: weatherViewModel.snapshot?.attributionURL,
+                updaterViewModel: updaterViewModel
             )
         }
         .frame(width: WeatherDefaults.popoverWidth)
@@ -173,6 +175,7 @@ struct MenuBarButtonStyle: ButtonStyle {
         weatherViewModel: WeatherViewModel.preview(),
         settingsViewModel: SettingsViewModel(),
         locationSearchViewModel: LocationSearchViewModel(locationProvider: MockLocationProvider()),
+        updaterViewModel: UpdaterViewModel(),
         locationService: LocationService()
     )
 }

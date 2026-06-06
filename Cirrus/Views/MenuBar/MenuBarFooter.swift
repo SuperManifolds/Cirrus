@@ -4,6 +4,7 @@ struct MenuBarFooter: View {
     let lastUpdated: Date?
     let attributionName: String?
     let attributionURL: URL?
+    @ObservedObject var updaterViewModel: UpdaterViewModel
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
@@ -39,6 +40,15 @@ struct MenuBarFooter: View {
             .buttonStyle(MenuBarButtonStyle())
 
             Button {
+                updaterViewModel.checkForUpdates()
+            } label: {
+                Label(String(localized: "Check for Updates..."), systemImage: "arrow.triangle.2.circlepath")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(MenuBarButtonStyle())
+            .disabled(!updaterViewModel.canCheckForUpdates)
+
+            Button {
                 NSApplication.shared.terminate(nil)
             } label: {
                 Label(String(localized: "Quit Cirrus"), systemImage: "power")
@@ -51,20 +61,12 @@ struct MenuBarFooter: View {
 }
 
 #if DEBUG
-#Preview("Open-Meteo") {
+#Preview {
     MenuBarFooter(
         lastUpdated: Date().addingTimeInterval(-180),
         attributionName: "Open-Meteo.com",
-        attributionURL: URL(string: "https://open-meteo.com")
-    )
-    .frame(width: 320)
-}
-
-#Preview("WeatherKit") {
-    MenuBarFooter(
-        lastUpdated: Date().addingTimeInterval(-60),
-        attributionName: "\u{F8FF} Weather",
-        attributionURL: URL(string: "https://weatherkit.apple.com/legal-attribution.html")
+        attributionURL: URL(string: "https://open-meteo.com"),
+        updaterViewModel: UpdaterViewModel()
     )
     .frame(width: 320)
 }

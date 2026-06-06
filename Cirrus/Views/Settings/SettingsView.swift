@@ -3,11 +3,12 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var settingsViewModel: SettingsViewModel
     @ObservedObject var locationSearchViewModel: LocationSearchViewModel
+    @ObservedObject var updaterViewModel: UpdaterViewModel
     let locationProvider: LocationService
 
     var body: some View {
         TabView {
-            GeneralSettingsTab(settingsViewModel: settingsViewModel)
+            GeneralSettingsTab(settingsViewModel: settingsViewModel, updaterViewModel: updaterViewModel)
                 .tabItem { Label(String(localized: "General"), systemImage: "gear") }
             LocationSettingsTab(
                 settingsViewModel: settingsViewModel,
@@ -27,6 +28,7 @@ struct SettingsView: View {
     SettingsView(
         settingsViewModel: SettingsViewModel(),
         locationSearchViewModel: LocationSearchViewModel(locationProvider: MockLocationProvider()),
+        updaterViewModel: UpdaterViewModel(),
         locationProvider: LocationService()
     )
 }

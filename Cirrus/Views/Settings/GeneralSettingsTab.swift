@@ -3,6 +3,7 @@ import SwiftUI
 
 struct GeneralSettingsTab: View {
     @ObservedObject var settingsViewModel: SettingsViewModel
+    @ObservedObject var updaterViewModel: UpdaterViewModel
 
     var body: some View {
         Form {
@@ -35,6 +36,11 @@ struct GeneralSettingsTab: View {
             Toggle(String(localized: "Notifications"), isOn: $settingsViewModel.showNotifications)
 
             Toggle(String(localized: "Launch at Login"), isOn: $settingsViewModel.launchAtLogin)
+
+            Button(String(localized: "Check for Updates...")) {
+                updaterViewModel.checkForUpdates()
+            }
+            .disabled(!updaterViewModel.canCheckForUpdates)
         }
         .formStyle(.grouped)
     }
@@ -42,7 +48,7 @@ struct GeneralSettingsTab: View {
 
 #if DEBUG
 #Preview {
-    GeneralSettingsTab(settingsViewModel: SettingsViewModel())
+    GeneralSettingsTab(settingsViewModel: SettingsViewModel(), updaterViewModel: UpdaterViewModel())
         .frame(width: 420, height: 320)
 }
 #endif

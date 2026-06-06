@@ -5,6 +5,7 @@ struct CirrusApp: App {
     private let isPreview = ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
 
     @StateObject private var settingsViewModel = SettingsViewModel()
+    @StateObject private var updaterViewModel = UpdaterViewModel()
     @State private var locationService = LocationService()
     @State private var weatherViewModel: WeatherViewModel?
     @State private var locationSearchViewModel: LocationSearchViewModel?
@@ -17,6 +18,7 @@ struct CirrusApp: App {
                     weatherViewModel: weatherVM,
                     settingsViewModel: settingsViewModel,
                     locationSearchViewModel: searchVM,
+                    updaterViewModel: updaterViewModel,
                     locationService: locationService
                 )
             }
@@ -59,6 +61,7 @@ struct CirrusApp: App {
                 SettingsView(
                     settingsViewModel: settingsViewModel,
                     locationSearchViewModel: searchVM,
+                    updaterViewModel: updaterViewModel,
                     locationProvider: locationService
                 )
             }
