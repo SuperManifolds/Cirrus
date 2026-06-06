@@ -86,6 +86,9 @@ struct CirrusApp: App {
         _weatherViewModel = State(wrappedValue: weatherVM)
         _locationSearchViewModel = State(wrappedValue: LocationSearchViewModel(locationProvider: locService))
 
+        AppState.shared.weatherViewModel = weatherVM
+        AppState.shared.settingsViewModel = settings
+
         weatherVM.startAutoRefresh(interval: settings.refreshInterval.duration)
 
         if settings.useCurrentLocation {
