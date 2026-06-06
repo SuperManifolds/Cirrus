@@ -36,7 +36,7 @@ struct LocationSearchHeader: View {
                     in: RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.searchField)
                 )
             } else {
-                HStack {
+                ZStack {
                     Button {
                         isSearching = true
                         isTextFieldFocused = true
@@ -53,23 +53,26 @@ struct LocationSearchHeader: View {
                     .accessibilityLabel(String(localized: "Location: \(locationName)"))
                     .accessibilityHint(String(localized: "Double-tap to search for a location"))
 
-                    Spacer()
-
-                    Button {
-                        onRefresh()
-                    } label: {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .rotationEffect(.degrees(isLoading ? 360 : 0))
-                            .animation(
-                                isLoading ? .linear(duration: 1).repeatForever(autoreverses: false) : .default,
-                                value: isLoading
-                            )
+                    HStack {
+                        Spacer()
+                        Button {
+                            onRefresh()
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.tertiary)
+                                .rotationEffect(.degrees(isLoading ? 360 : 0))
+                                .animation(
+                                    isLoading
+                                        ? .linear(duration: 1).repeatForever(autoreverses: false)
+                                        : .default,
+                                    value: isLoading
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(isLoading)
+                        .accessibilityLabel(String(localized: "Refresh weather"))
                     }
-                    .buttonStyle(.plain)
-                    .disabled(isLoading)
-                    .accessibilityLabel(String(localized: "Refresh weather"))
                 }
             }
         }
