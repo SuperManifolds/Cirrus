@@ -8,7 +8,9 @@
   A lightweight, native macOS menu bar weather app. Built with SwiftUI.
 </p>
 
-![Cirrus weather popover](cirrus.jpeg)
+<p align="center">
+  <img src="cirrus.jpeg" width="400" alt="Cirrus weather popover">
+</p>
 
 ## Install
 
