@@ -60,6 +60,14 @@ final class SettingsViewModel: ObservableObject {
         didSet { UserDefaults.standard.set(showNotifications, forKey: Keys.showNotifications) }
     }
 
+    @Published var hiddenCardIDs: Set<String> {
+        didSet {
+            if let data = try? JSONEncoder().encode(hiddenCardIDs) {
+                UserDefaults.standard.set(data, forKey: Keys.hiddenCardIDs)
+            }
+        }
+    }
+
     @Published var launchAtLogin: Bool {
         didSet { updateLaunchAtLogin() }
     }
@@ -113,6 +121,12 @@ final class SettingsViewModel: ObservableObject {
             ? true
             : defaults.bool(forKey: Keys.showNotifications)
 
+        if let data = defaults.data(forKey: Keys.hiddenCardIDs) {
+            hiddenCardIDs = (try? JSONDecoder().decode(Set<String>.self, from: data)) ?? []
+        } else {
+            hiddenCardIDs = []
+        }
+
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 
@@ -160,6 +174,7 @@ final class SettingsViewModel: ObservableObject {
         static let favoriteLocations = "favoriteLocations"
         static let showAISummary = "showAISummary"
         static let showNotifications = "showNotifications"
+        static let hiddenCardIDs = "hiddenCardIDs"
     }
 
     #if DEBUG

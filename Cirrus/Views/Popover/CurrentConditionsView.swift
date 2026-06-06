@@ -91,7 +91,7 @@ struct CurrentConditionsView: View {
                 PollenCard(name: String(localized: "Ragweed Pollen"), grains: pollen?.ragweed),
                 SunriseCard(today: today),
                 SunsetCard(today: today)
-            ])
+            ], hiddenCardIDs: settingsViewModel.hiddenCardIDs)
         }
         .padding(.vertical, LayoutConstants.Padding.sectionVertical)
         .padding(.horizontal, LayoutConstants.Padding.sectionHorizontal)

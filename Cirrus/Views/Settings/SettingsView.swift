@@ -16,6 +16,8 @@ struct SettingsView: View {
                 locationProvider: locationProvider
             )
             .tabItem { Label(String(localized: "Location"), systemImage: "location") }
+            CardsSettingsTab(settingsViewModel: settingsViewModel)
+                .tabItem { Label(String(localized: "Cards"), systemImage: "square.grid.2x2") }
             ProviderSettingsTab(settingsViewModel: settingsViewModel)
                 .tabItem { Label(String(localized: "Provider"), systemImage: "cloud") }
         }

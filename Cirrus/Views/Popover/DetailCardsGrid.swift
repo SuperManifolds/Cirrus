@@ -2,9 +2,10 @@ import SwiftUI
 
 struct DetailCardsGrid: View {
     let cards: [any WeatherCard]
+    var hiddenCardIDs: Set<String> = []
 
     var body: some View {
-        let visible = cards.filter(\.isRelevant)
+        let visible = cards.filter { $0.isRelevant && !hiddenCardIDs.contains($0.cardID) }
         let rows = stride(from: 0, to: visible.count, by: 2).map { idx in
             (visible[idx], idx + 1 < visible.count ? visible[idx + 1] : nil)
         }

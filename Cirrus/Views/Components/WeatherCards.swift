@@ -6,6 +6,7 @@ enum CardVisualPlacement {
 }
 
 protocol WeatherCard {
+    var cardID: String { get }
     var title: String { get }
     var value: String { get }
     var icon: String { get }
@@ -31,6 +32,7 @@ extension WeatherCard {
 struct WindCard: WeatherCard {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
+    var cardID: String { "wind" }
     var title: String { String(localized: "Wind") }
     var icon: String { "wind" }
     var iconColor: Color { .teal }
@@ -49,6 +51,7 @@ struct WindCard: WeatherCard {
 struct HumidityCard: WeatherCard {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
+    var cardID: String { "humidity" }
     var title: String { String(localized: "Humidity") }
     var icon: String { "humidity.fill" }
     var iconColor: Color { .cyan }
@@ -64,6 +67,7 @@ struct HumidityCard: WeatherCard {
 struct UVIndexCard: WeatherCard {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
+    var cardID: String { "uvIndex" }
     var title: String { String(localized: "UV Index") }
     var icon: String { "sun.max.fill" }
     var iconColor: Color { .orange }
@@ -91,6 +95,7 @@ struct UVIndexCard: WeatherCard {
 struct PressureCard: WeatherCard {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
+    var cardID: String { "pressure" }
     var title: String { String(localized: "Pressure") }
     var icon: String { "gauge.medium" }
     var iconColor: Color { .purple }
@@ -124,6 +129,7 @@ struct PressureCard: WeatherCard {
 struct CloudCoverCard: WeatherCard {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
+    var cardID: String { "cloudCover" }
     var title: String { String(localized: "Cloud Cover") }
     var icon: String { "cloud.fill" }
     var iconColor: Color { .gray }
@@ -139,6 +145,7 @@ struct CloudCoverCard: WeatherCard {
 struct VisibilityCard: WeatherCard {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
+    var cardID: String { "visibility" }
     var title: String { String(localized: "Visibility") }
     var icon: String { "eye.fill" }
     var iconColor: Color { .mint }
@@ -160,6 +167,7 @@ struct DewPointCard: WeatherCard {
     let current: CurrentWeather
     let hourly: [HourlyForecast]
     let unit: TemperatureUnit
+    var cardID: String { "dewPoint" }
     var title: String { String(localized: "Dew Point") }
     var icon: String { "drop.degreesign.fill" }
     var iconColor: Color { .teal }
@@ -178,6 +186,7 @@ struct DewPointCard: WeatherCard {
 
 struct SnowDepthCard: WeatherCard {
     let current: CurrentWeather
+    var cardID: String { "snowDepth" }
     var title: String { String(localized: "Snow Depth") }
     var icon: String { "snowflake" }
     var iconColor: Color { .blue }
@@ -200,6 +209,7 @@ struct SnowDepthCard: WeatherCard {
 
 struct SunriseCard: WeatherCard {
     let today: DailyForecast?
+    var cardID: String { "sunrise" }
     var title: String { String(localized: "Sunrise") }
     var icon: String { "sunrise.fill" }
     var iconColor: Color { .yellow }
@@ -219,6 +229,7 @@ struct SunriseCard: WeatherCard {
 
 struct SunsetCard: WeatherCard {
     let today: DailyForecast?
+    var cardID: String { "sunset" }
     var title: String { String(localized: "Sunset") }
     var icon: String { "sunset.fill" }
     var iconColor: Color { .orange }
@@ -240,6 +251,7 @@ struct SunsetCard: WeatherCard {
 
 struct AQICard: WeatherCard {
     let airQuality: AirQuality?
+    var cardID: String { "aqi" }
     var title: String { String(localized: "Air Quality") }
     var icon: String { "aqi.medium" }
     var iconColor: Color { aqiColor }
@@ -273,6 +285,7 @@ struct AQICard: WeatherCard {
 
 struct PM25Card: WeatherCard {
     let airQuality: AirQuality?
+    var cardID: String { "pm25" }
     var title: String { String(localized: "PM2.5") }
     var icon: String { "circle.dotted.circle" }
     var iconColor: Color { .indigo }
@@ -298,6 +311,7 @@ struct PM25Card: WeatherCard {
 
 struct PM10Card: WeatherCard {
     let airQuality: AirQuality?
+    var cardID: String { "pm10" }
     var title: String { String(localized: "PM10") }
     var icon: String { "circle.dotted.circle" }
     var iconColor: Color { .brown }
@@ -323,6 +337,7 @@ struct PM10Card: WeatherCard {
 
 struct OzoneCard: WeatherCard {
     let airQuality: AirQuality?
+    var cardID: String { "ozone" }
     var title: String { String(localized: "Ozone") }
     var icon: String { "aqi.low" }
     var iconColor: Color { .blue }
@@ -335,6 +350,7 @@ struct OzoneCard: WeatherCard {
 
 struct NitrogenDioxideCard: WeatherCard {
     let airQuality: AirQuality?
+    var cardID: String { "no2" }
     var title: String { "NO₂" }
     var icon: String { "aqi.low" }
     var iconColor: Color { .orange }
@@ -347,6 +363,7 @@ struct NitrogenDioxideCard: WeatherCard {
 
 struct SulphurDioxideCard: WeatherCard {
     let airQuality: AirQuality?
+    var cardID: String { "so2" }
     var title: String { "SO₂" }
     var icon: String { "aqi.low" }
     var iconColor: Color { .yellow }
@@ -359,6 +376,7 @@ struct SulphurDioxideCard: WeatherCard {
 
 struct CarbonMonoxideCard: WeatherCard {
     let airQuality: AirQuality?
+    var cardID: String { "co" }
     var title: String { "CO" }
     var icon: String { "aqi.low" }
     var iconColor: Color { .red }
@@ -374,6 +392,7 @@ struct CarbonMonoxideCard: WeatherCard {
 struct PollenCard: WeatherCard {
     let name: String
     let grains: Double?
+    var cardID: String { "pollen_\(name)" }
     var title: String { name }
     var icon: String { "leaf.fill" }
     var iconColor: Color { pollenColor }

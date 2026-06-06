@@ -51,7 +51,7 @@ enum LayoutConstants {
         static let precipBarCornerRadius: CGFloat = 1.5
         static let precipMinIntensity: Double = 0.5
         static let settingsWidth: CGFloat = 420
-        static let settingsHeight: CGFloat = 320
+        static let settingsHeight: CGFloat = 420
         static let sparklineWidth: CGFloat = 40
         static let sparklineHeight: CGFloat = 16
         static let arcDotSize: CGFloat = 6
