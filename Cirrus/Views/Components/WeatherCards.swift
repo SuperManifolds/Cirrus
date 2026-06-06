@@ -321,6 +321,54 @@ struct PM10Card: WeatherCard {
     }
 }
 
+struct OzoneCard: WeatherCard {
+    let airQuality: AirQuality?
+    var title: String { String(localized: "Ozone") }
+    var icon: String { "aqi.low" }
+    var iconColor: Color { .blue }
+    var isRelevant: Bool { (airQuality?.ozone ?? 0) > 100 }
+    var value: String {
+        guard let val = airQuality?.ozone else { return "" }
+        return "\(Int(val)) µg/m³"
+    }
+}
+
+struct NitrogenDioxideCard: WeatherCard {
+    let airQuality: AirQuality?
+    var title: String { "NO₂" }
+    var icon: String { "aqi.low" }
+    var iconColor: Color { .orange }
+    var isRelevant: Bool { (airQuality?.nitrogenDioxide ?? 0) > 40 }
+    var value: String {
+        guard let val = airQuality?.nitrogenDioxide else { return "" }
+        return "\(Int(val)) µg/m³"
+    }
+}
+
+struct SulphurDioxideCard: WeatherCard {
+    let airQuality: AirQuality?
+    var title: String { "SO₂" }
+    var icon: String { "aqi.low" }
+    var iconColor: Color { .yellow }
+    var isRelevant: Bool { (airQuality?.sulphurDioxide ?? 0) > 20 }
+    var value: String {
+        guard let val = airQuality?.sulphurDioxide else { return "" }
+        return "\(Int(val)) µg/m³"
+    }
+}
+
+struct CarbonMonoxideCard: WeatherCard {
+    let airQuality: AirQuality?
+    var title: String { "CO" }
+    var icon: String { "aqi.low" }
+    var iconColor: Color { .red }
+    var isRelevant: Bool { (airQuality?.carbonMonoxide ?? 0) > 4000 }
+    var value: String {
+        guard let val = airQuality?.carbonMonoxide else { return "" }
+        return "\(Int(val)) µg/m³"
+    }
+}
+
 // MARK: - Pollen Cards
 
 struct PollenCard: WeatherCard {
