@@ -14,7 +14,7 @@ struct UVSeverityBar: View {
                 RoundedRectangle(cornerRadius: 2)
                     .fill(.primary.opacity(0.08))
 
-                // Filled portion with gradient
+                // Filled portion — gradient spans full width, clipped to filled range
                 RoundedRectangle(cornerRadius: 2)
                     .fill(
                         LinearGradient(
@@ -23,7 +23,9 @@ struct UVSeverityBar: View {
                             endPoint: .trailing
                         )
                     )
-                    .frame(width: geometry.size.width * fraction)
+                    .frame(width: geometry.size.width)
+                    .frame(width: geometry.size.width * fraction, alignment: .leading)
+                    .clipShape(RoundedRectangle(cornerRadius: 2))
             }
         }
         .accessibilityHidden(true)
