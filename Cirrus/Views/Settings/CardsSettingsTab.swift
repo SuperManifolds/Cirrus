@@ -11,7 +11,7 @@ struct CardsSettingsTab: View {
     }
 
     private let weatherCards: [CardInfo] = [
-        CardInfo(id: "wind", title: String(localized: "Wind"), icon: "wind", iconColor: .teal),
+        CardInfo(id: "wind", title: String(localized: "Wind"), icon: "wind", iconColor: .mint),
         CardInfo(id: "humidity", title: String(localized: "Humidity"), icon: "humidity.fill", iconColor: .cyan),
         CardInfo(id: "uvIndex", title: String(localized: "UV Index"), icon: "sun.max.fill", iconColor: .orange),
         CardInfo(id: "pressure", title: String(localized: "Pressure"), icon: "gauge.medium", iconColor: .purple),
