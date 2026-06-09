@@ -49,7 +49,7 @@ struct MenuBarLabel: View {
                 case .iconTemperatureAndCondition:
                     if let current = weatherViewModel.snapshot?.current {
                         let temp = current.temperature.formatted(as: settingsViewModel.temperatureUnit)
-                        Text("\(temp) \(current.condition.displayName)")
+                        Text(String(localized: "\(temp) \(current.condition.displayName)"))
                     }
             }
         }
@@ -62,13 +62,13 @@ struct MenuBarLabel: View {
             return String(localized: "Cirrus Weather")
         }
         let temp = current.temperature.formatted(as: settingsViewModel.temperatureUnit)
-        return "\(temp), \(current.condition.displayName)"
+        return String(localized: "\(temp), \(current.condition.displayName)")
     }
 
     private var coloredIcon: NSImage {
         guard let base = NSImage(
             systemSymbolName: symbolName,
-            accessibilityDescription: "Weather"
+            accessibilityDescription: String(localized: "Weather")
         ) else {
             return NSImage()
         }

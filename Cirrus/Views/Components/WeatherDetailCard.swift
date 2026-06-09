@@ -66,7 +66,7 @@ struct WeatherDetailCard: View {
                 )
         )
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title): \(value)")
+        .accessibilityLabel(String(localized: "\(title): \(value)"))
     }
 }
 

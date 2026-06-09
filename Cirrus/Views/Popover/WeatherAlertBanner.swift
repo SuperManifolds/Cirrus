@@ -37,7 +37,7 @@ struct WeatherAlertBanner: View {
                         }
                     }
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("\(alert.severity.displayName): \(alert.event)")
+                    .accessibilityLabel(String(localized: "\(alert.severity.displayName): \(alert.event)"))
                     .accessibilityValue(alert.headline)
                     .accessibilityHint(String(localized: "Double-tap to expand or collapse"))
 
