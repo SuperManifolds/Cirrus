@@ -31,6 +31,15 @@ enum LayoutConstants {
         static let searchDropdown: CGFloat = 36
     }
 
+    enum Search {
+        static let minQueryLength = 2
+        static let rowVerticalPadding: CGFloat = 4
+        static let rowHorizontalPadding: CGFloat = 6
+        static let refreshIconSize: CGFloat = 11
+        static let refreshTrailingPadding: CGFloat = 4
+        static let locationChevronSpacing: CGFloat = 4
+    }
+
     enum Size {
         static let conditionIcon: CGFloat = 36
         static let conditionTemperature: CGFloat = 34

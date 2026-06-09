@@ -12,6 +12,16 @@ struct LocationSearchHeader: View {
     @State private var isSearching = false
     @FocusState private var isTextFieldFocused: Bool
 
+    private var hasSearchQuery: Bool {
+        searchViewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).count
+            >= LayoutConstants.Search.minQueryLength
+    }
+
+    private var hasDropdownContent: Bool {
+        !searchViewModel.results.isEmpty || searchViewModel.isSearching
+            || hasSearchQuery || !settingsViewModel.favoriteLocations.isEmpty
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             if isSearching {
@@ -21,10 +31,7 @@ struct LocationSearchHeader: View {
                     TextField(String(localized: "Search city..."), text: $searchViewModel.searchText)
                         .textFieldStyle(.plain)
                         .focused($isTextFieldFocused)
-                    Button {
-                        isSearching = false
-                        searchViewModel.clearResults()
-                    } label: {
+                    Button(action: dismissSearch) {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundStyle(.secondary)
                     }
@@ -41,7 +48,7 @@ struct LocationSearchHeader: View {
                         isSearching = true
                         isTextFieldFocused = true
                     } label: {
-                        HStack(spacing: 4) {
+                        HStack(spacing: LayoutConstants.Search.locationChevronSpacing) {
                             Text(locationName)
                                 .font(.headline)
                             Image(systemName: "chevron.down")
@@ -55,13 +62,11 @@ struct LocationSearchHeader: View {
 
                     HStack {
                         Spacer()
-                        Button {
-                            onRefresh()
-                        } label: {
+                        Button(action: onRefresh) {
                             Image(systemName: "arrow.clockwise")
-                                .font(.system(size: 11))
+                                .font(.system(size: LayoutConstants.Search.refreshIconSize))
                                 .foregroundStyle(.tertiary)
-                                .padding(.trailing, 4)
+                                .padding(.trailing, LayoutConstants.Search.refreshTrailingPadding)
                                 .rotationEffect(.degrees(isLoading ? 360 : 0))
                                 .animation(
                                     isLoading
@@ -79,148 +84,42 @@ struct LocationSearchHeader: View {
         }
         .overlay(alignment: .top) {
             if isSearching && (hasDropdownContent || isPinnedLocation) {
-                searchResults
-                    .offset(y: LayoutConstants.Offset.searchDropdown)
+                SearchDropdown(
+                    isPinnedLocation: isPinnedLocation,
+                    hasSearchQuery: hasSearchQuery,
+                    searchViewModel: searchViewModel,
+                    settingsViewModel: settingsViewModel,
+                    onSelectLocation: { selectLocation($0) },
+                    onUseCurrentLocation: useCurrentLocation,
+                    onToggleFavorite: { toggleFavorite($0) }
+                )
+                .offset(y: LayoutConstants.Offset.searchDropdown)
             }
         }
         .zIndex(1)
     }
 
-    private var hasSearchQuery: Bool {
-        searchViewModel.searchText.trimmingCharacters(in: .whitespacesAndNewlines).count >= 2
+    private func dismissSearch() {
+        isSearching = false
+        searchViewModel.clearResults()
     }
 
-    private var hasDropdownContent: Bool {
-        !searchViewModel.results.isEmpty || searchViewModel.isSearching
-            || hasSearchQuery || !settingsViewModel.favoriteLocations.isEmpty
+    private func selectLocation(_ location: Location) {
+        onLocationSelected(location)
+        dismissSearch()
     }
 
-    private var searchResults: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            if isPinnedLocation {
-                Button {
-                    onUseCurrentLocation()
-                    isSearching = false
-                    searchViewModel.clearResults()
-                } label: {
-                    Label(String(localized: "Current Location"), systemImage: "location.fill")
-                        .font(.callout)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 6)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
+    private func useCurrentLocation() {
+        onUseCurrentLocation()
+        dismissSearch()
+    }
 
-            if !settingsViewModel.favoriteLocations.isEmpty && !hasSearchQuery {
-                if isPinnedLocation { Divider() }
-                ForEach(settingsViewModel.favoriteLocations) { location in
-                    HStack {
-                        Button {
-                            onLocationSelected(location)
-                            isSearching = false
-                            searchViewModel.clearResults()
-                        } label: {
-                            HStack {
-                                Label(location.name, systemImage: "star.fill")
-                                    .font(.callout)
-                                Spacer()
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-
-                        Button {
-                            settingsViewModel.removeFavorite(location)
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.caption2)
-                                .foregroundStyle(.tertiary)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(String(localized: "Remove \(location.name) from favorites"))
-                    }
-                    .padding(.vertical, 4)
-                    .padding(.horizontal, 6)
-                }
-            }
-
-            if isPinnedLocation || !settingsViewModel.favoriteLocations.isEmpty {
-                if !searchViewModel.results.isEmpty || hasSearchQuery { Divider() }
-            }
-
-            if searchViewModel.isSearching {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                        .controlSize(.small)
-                    Spacer()
-                }
-                .padding(.vertical, 4)
-            }
-
-            if !searchViewModel.isSearching && searchViewModel.results.isEmpty && hasSearchQuery {
-                Text(String(localized: "No results found"))
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
-            }
-
-            ForEach(searchViewModel.results) { location in
-                HStack {
-                    Button {
-                        onLocationSelected(location)
-                        isSearching = false
-                        searchViewModel.clearResults()
-                    } label: {
-                        HStack {
-                            Text(location.name)
-                                .font(.callout)
-                            if let area = location.administrativeArea {
-                                Text(area)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        if settingsViewModel.isFavorite(location) {
-                            settingsViewModel.removeFavorite(location)
-                        } else {
-                            settingsViewModel.addFavorite(location)
-                        }
-                    } label: {
-                        Image(systemName: settingsViewModel.isFavorite(location) ? "star.fill" : "star")
-                            .font(.caption)
-                            .foregroundStyle(settingsViewModel.isFavorite(location) ? .yellow : .secondary.opacity(0.5))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(
-                        settingsViewModel.isFavorite(location)
-                            ? String(localized: "Remove from favorites")
-                            : String(localized: "Add to favorites")
-                    )
-                }
-                .padding(.vertical, 4)
-                .padding(.horizontal, 6)
-            }
+    private func toggleFavorite(_ location: Location) {
+        if settingsViewModel.isFavorite(location) {
+            settingsViewModel.removeFavorite(location)
+        } else {
+            settingsViewModel.addFavorite(location)
         }
-        .padding(LayoutConstants.Padding.card)
-        .background(
-            RoundedRectangle(cornerRadius: LayoutConstants.CornerRadius.card)
-                .fill(.ultraThickMaterial)
-                .shadow(
-                    color: .black.opacity(LayoutConstants.Opacity.searchShadow),
-                    radius: LayoutConstants.Opacity.searchShadowRadius,
-                    y: LayoutConstants.Opacity.searchShadowY
-                )
-        )
     }
 }
 
