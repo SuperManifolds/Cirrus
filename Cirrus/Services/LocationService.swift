@@ -54,22 +54,21 @@ final class LocationService: NSObject, LocationProviding {
         }
     }
 
-    @available(macOS, deprecated: 26.0, message: "CLGeocoder deprecated; revisit when MKAddress exposes locality")
     private func reverseGeocode(_ clLocation: CLLocation) {
         Task {
             do {
-                let geocoder = CLGeocoder()
-                let placemarks = try await geocoder.reverseGeocodeLocation(clLocation)
-                guard let placemark = placemarks.first else { return }
-                let name = placemark.locality
-                    ?? placemark.administrativeArea
+                guard let request = MKReverseGeocodingRequest(location: clLocation) else { return }
+                let mapItems = try await request.mapItems
+                guard let mapItem = mapItems.first else { return }
+                let name = mapItem.addressRepresentations?.cityName
+                    ?? mapItem.address?.shortAddress
                     ?? String(localized: "Current Location")
                 currentLocation = Location(
                     name: name,
                     latitude: clLocation.coordinate.latitude,
                     longitude: clLocation.coordinate.longitude,
-                    country: placemark.country,
-                    administrativeArea: placemark.administrativeArea
+                    country: mapItem.addressRepresentations?.regionName,
+                    administrativeArea: mapItem.addressRepresentations?.cityWithContext
                 )
                 Log.location.debug("Resolved location: \(name)")
             } catch {

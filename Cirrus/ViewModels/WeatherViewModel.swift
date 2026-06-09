@@ -18,8 +18,8 @@ final class WeatherViewModel: ObservableObject {
     private let locationProvider: any LocationProviding
     private let airQualityProvider: any AirQualityProviding
     private let pollenProvider: any PollenProviding
-    private let summaryService = WeatherSummaryService()
-    private let notificationService = NotificationService()
+    private let summaryService: WeatherSummaryService
+    private let notificationService: NotificationService
     private let cache: WeatherCacheService
     private var previousAlertIDs: Set<String> = []
     private var previousHadRain = false
@@ -33,8 +33,8 @@ final class WeatherViewModel: ObservableObject {
     init(
         weatherProvider: any WeatherProviding,
         locationProvider: any LocationProviding,
-        airQualityProvider: any AirQualityProviding = OpenMeteoAirQualityService(),
-        pollenProvider: any PollenProviding = OpenMeteoPollenService(),
+        airQualityProvider: any AirQualityProviding,
+        pollenProvider: any PollenProviding,
         cache: WeatherCacheService = WeatherCacheService()
     ) {
         self.weatherProvider = weatherProvider
@@ -42,6 +42,8 @@ final class WeatherViewModel: ObservableObject {
         self.airQualityProvider = airQualityProvider
         self.pollenProvider = pollenProvider
         self.cache = cache
+        self.summaryService = WeatherSummaryService()
+        self.notificationService = NotificationService()
 
         locationProvider.currentLocationPublisher
             .receive(on: RunLoop.main)
@@ -187,7 +189,9 @@ final class WeatherViewModel: ObservableObject {
     static func preview() -> WeatherViewModel {
         let vm = WeatherViewModel(
             weatherProvider: MockWeatherProvider(),
-            locationProvider: MockLocationProvider()
+            locationProvider: MockLocationProvider(),
+            airQualityProvider: OpenMeteoAirQualityService(),
+            pollenProvider: OpenMeteoPollenService()
         )
         Task { await vm.refresh() }
         return vm

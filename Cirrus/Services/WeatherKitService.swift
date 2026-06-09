@@ -117,6 +117,7 @@ struct WeatherKitService: WeatherProviding {
                 case .severe: .severe
                 case .moderate: .moderate
                 case .minor: .minor
+                case .unknown: .unknown
                 @unknown default: .unknown
             }
             return WeatherAlert(
@@ -141,7 +142,7 @@ struct WeatherKitService: WeatherProviding {
                 case .rain, .hail: .rain
                 case .snow: .snow
                 case .sleet: .sleet
-                case .none: .none
+                case .none, .mixed: nil
                 @unknown default: nil
             }
             return MinuteForecast(

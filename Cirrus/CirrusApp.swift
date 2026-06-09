@@ -78,7 +78,9 @@ struct CirrusApp: App {
 
         let weatherVM = WeatherViewModel(
             weatherProvider: provider,
-            locationProvider: locService
+            locationProvider: locService,
+            airQualityProvider: OpenMeteoAirQualityService(),
+            pollenProvider: OpenMeteoPollenService()
         )
         weatherVM.enableAISummary = settings.showAISummary
         weatherVM.enableNotifications = settings.showNotifications

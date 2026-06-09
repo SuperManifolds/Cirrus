@@ -16,6 +16,8 @@ struct WeatherViewModelTests {
         let vm = WeatherViewModel(
             weatherProvider: MockWeatherProvider(),
             locationProvider: locProvider,
+            airQualityProvider: OpenMeteoAirQualityService(),
+            pollenProvider: OpenMeteoPollenService(),
             cache: cache
         )
         return (vm, locProvider)
@@ -86,7 +88,9 @@ struct WeatherViewModelTests {
         let locProvider = MockLocationProvider()
         let vm = WeatherViewModel(
             weatherProvider: FailingWeatherProvider(),
-            locationProvider: locProvider
+            locationProvider: locProvider,
+            airQualityProvider: OpenMeteoAirQualityService(),
+            pollenProvider: OpenMeteoPollenService()
         )
         await vm.refresh()
 
